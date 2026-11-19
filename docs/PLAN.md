@@ -1,8 +1,8 @@
 # DEFINE — Plan
 
-A loud, always-moving Android app that turns short arm/chest workouts into a casino you can't stop
-visiting. The training side is deliberately conservative (a 40-something body heals slowly); the
-reward side is deliberately excessive (a 40-something brain still loves a slot machine).
+A loud, always-moving Android app that turns short arm/chest workouts into a crystal-hunting game
+you can't stop coming back to. The training side is deliberately conservative (a 40-something body heals slowly); the
+reward side is deliberately excessive (a 40-something brain still loves a surprise).
 
 ---
 
@@ -14,7 +14,7 @@ reward side is deliberately excessive (a 40-something brain still loves a slot m
 - **Recovery is built into the rotation**, not something you're punished for.
 - **Progress only when the body says yes.** A step up happens only after a session that felt
   manageable *and* a soreness check-in that came back low.
-- **No rewards for overdoing it.** Bonus reps are capped at +2 per set. The casino can never
+- **No rewards for overdoing it.** Bonus reps are capped at +2 per set. The rewards can never
   tempt you into an injury.
 
 ### Three-day rotation (each muscle group gets ~72 h to recover)
@@ -58,7 +58,7 @@ prestige.
 - **Hold** when effort was Brutal or soreness was 3.
 - **Step back one** when a set wasn't finished or soreness hit 5.
 - **Deload every 5th week:** volume −40%, full rewards ("Recharge Week" with its own loot table).
-- **Missed 4+ days:** resume one step back, with a "Welcome Back" crate, never a guilt screen.
+- **Missed 4+ days:** resume one step back, with a "Welcome Back" geode, never a guilt screen.
 - **Max tests** every 4 weeks for push-ups are staged as boss fights (boss health bar = target reps).
 
 Rough timeline: ~2 sessions per group per week puts curls at 3×10 in about 5 weeks and the full
@@ -82,43 +82,47 @@ endgame at roughly 5–7 months. The engine adapts to real data, so this is a fo
 
 ---
 
-## 3. The casino (gamification)
+## 3. The reward system: Crystals
 
-No real money, no ads, no purchases, ever. Everything is earned by training.
+No casino imagery: no slots, wheels, chips or jackpots, and no real money, ads or purchases, ever.
+The *mechanics* that keep people coming back (random rewards, guaranteed drops, near-misses, streaks,
+collecting, commitments) live inside one theme: **you grow and crack open crystals.** The theme
+fits the name (a cut gem is all *defined* facets), and gems are made for bright, prismatic effects.
 
-### Currencies
+### What you earn
 - **XP** → Rank (Rookie → Iron → Steel → Titan → Mythic → *Defined*), with prestige after the endgame.
-- **Chips** → spend on slots, wagers and cosmetics.
-- **Keys** → open crates. Earned by completing missions.
-- **Shards** → from duplicate cards; craft any card you're missing.
+- **Shards**: what you spend on Forge fusions and Workshop cosmetics.
+- **Geodes**: rough stones you crack open by tapping. Each one holds a crystal.
+- **Dust**: from duplicate crystals; turns into any crystal you're missing.
 
-### Rarity ladder (each tier has its own full-screen effect)
-Common (white) · Rare (cyan) · Epic (violet) · Legendary (gold) · **Mythic** (prismatic, screen-wide).
+### Rarity = gemstone (each tier has its own full-screen effect)
+Quartz (white) · Aquamarine (cyan) · Amethyst (violet) · Topaz (gold) · **Opal** (prismatic, screen-wide).
 
 ### Mechanics, by where they fire
-| Moment | Mechanic |
-|---|---|
-| Every rep tap | Pop + haptic; a **combo meter** with rising pitch (each tap a step up the scale) |
-| Every completed set | **Set Roll**, a variable-ratio drop (chips most of the time, sometimes rare+, very rarely legendary) with a reel reveal |
-| Mission complete | **Loot Crate**: god-rays, shake, burst. A pity counter guarantees an Epic within 10 crates and a Legendary within 40 |
-| Done inside a window | **Scratch card**: finger-scratch to reveal. Morning-window scratch cards have better odds (Early-Bird) |
-| First open in a window | **Daily Wheel** spin |
-| Any time | **Iron Slots**: 3 reels, spend chips; near-miss animations included as requested |
-| Every mission | Feeds the **Progressive Jackpot** (live ticking counter on Home). Every completion has a small hit chance, raised by streak length |
-| Streak | **Multiplier ladder** (1.0× → 3.0× at 30 days). **Streak Shields** are earnable, and one auto-equips on a missed day |
-| After a mission | **Double or Nothing**: wager chips that you'll train inside tomorrow's window |
-| Random | **Happy Hour**: surprise 2× drop windows, announced by notification and favouring the lunch hour |
-| Level up | **Plinko drop** for the level reward |
-| Ongoing | **Collection**: ~60 holo-foil cards in themed sets ("Iron Beasts", "Mythic Lifters", "Deep Water"), with set-completion bonuses |
-| 28-day cycle | **Season Track**: 40 tiers of rewards; a fresh season each month |
-| Daily/weekly | **Bounties**, e.g. "Train before 7:20", "3 mornings this week", "Perfect form week" |
-| Milestones | **Boss fights** for max tests and the endgame goals |
-| Shop | Cosmetics: themes, rep-tap effects, particle trails, sound packs, crate skins |
+| Moment | Mechanic | (Psychology behind it) |
+|---|---|---|
+| Every rep tap | Pop + haptic; a **combo meter** with rising pitch (each tap a step up the scale) | Instant feedback |
+| Every completed set | **Spark**: a spark arcs off the rep target and lands as a shard. Usually Quartz, sometimes better, very rarely Topaz | Random rewards on an unpredictable schedule |
+| Mission complete | **Geode**: tap to crack it; fractures spread, light leaks through the cracks, then it bursts open | Opening a mystery box |
+| Bad luck protection | Geodes get visibly **denser and glowier** as you go: an Amethyst is guaranteed within 10, a Topaz within 40 | A guaranteed drop after a dry spell (often called a "pity timer") |
+| Done inside a window | **Polish**: rub a dull stone with your finger to reveal its colour. Morning stones polish to better gems (**Early-Bird**) | Reveal by scratching |
+| First open in a window | **Meteor**: a small meteor streaks across Home; tap to catch it | A daily login reward |
+| Any time | **Forge**: fuse 3 crystals into one, with a chance it jumps a rarity tier. The flicker toward the next colour that *almost* happens is the near-miss | Variable outcome + near-miss |
+| Every mission | **The Core**: a giant crystal at the centre of Home that grows with every workout. Any day it can **bloom**, a supernova that showers rewards. Longer streaks make a bloom more likely | Growing prize pool |
+| Streak | **Resonance**: the Core's glow multiplies rewards (1.0× → 3.0× at 30 days). Earnable **Shields** absorb one missed day automatically | Streak multiplier + loss aversion |
+| After a mission | **Pledge**: set a crystal into tomorrow's window. Train in the window and it grows a size; miss and it cracks (a Shield protects it) | Commitment device |
+| Random | **Aurora**: surprise 2× windows when the sky lights up, announced by notification and favouring the lunch hour | Surprise bonus |
+| Level up | **Cascade**: the old rank's crystal shatters and the shards rain down into rewards | Celebration |
+| Ongoing | **Cabinet**: ~60 named crystals in themed sets ("Deep Water", "Ironstone", "Starfall"), procedurally shaped, refracting light as you tilt the phone. Set-completion bonuses | Collecting |
+| 28-day cycle | **Expedition**: a 40-step path through biomes (caves → reef → glacier → volcano → orbit) with rewards along the way; a new expedition each month | Season pass |
+| Daily/weekly | **Quests**, e.g. "Train before 7:20", "3 mornings this week", "Perfect form week" | Short-term goals |
+| Milestones | **Boss fights** for max tests and the endgame goals | Big moments |
+| Workshop | Cosmetics: themes, rep-tap effects, particle trails, sound packs, geode skins | Something to spend on |
 
-### Guardrails baked into the economy
+### Guardrails baked into the rewards
 - RECHARGE days and deload weeks pay full rewards, so resting is never the "losing" move.
 - Bonus reps beyond prescription are capped and pay nothing extra past +2.
-- A broken streak loses the multiplier, never banked chips or cards.
+- A broken streak dims Resonance; it never takes away banked shards or crystals.
 
 ---
 
@@ -139,10 +143,10 @@ plus a clean sans for body text.
 - Every number rolls like an odometer.
 - Transitions: the mission card morphs into the workout player; radial wipes; zoom-blur between
   major screens.
-- **Full-screen effects library:** confetti cannon, shockwave rings, coin fountains, god-rays,
-  fireworks, lightning, screen shake, and a chromatic-aberration flash for Legendary/Mythic.
-- **Sound:** synthesized in code (AudioTrack), so there are no asset licences. Arpeggios, coin
-  clinks, reel ticks and jackpot sirens.
+- **Full-screen effects library:** confetti cannon, shockwave rings, shard fountains, god-rays,
+  fireworks, lightning, screen shake, and a colour-split flash for Topaz/Opal.
+- **Sound:** synthesized in code (AudioTrack), so there are no asset licences. Arpeggios, crystal
+  chimes, cracking stone, and a big swell when the Core blooms.
 - **Haptics:** composed vibration patterns (Android 11+) with fallbacks.
 - **Intensity setting:** Chill / **Hype** (default) / Absolutely Unhinged. A global mute is
   available for when you're near other people.
@@ -154,17 +158,17 @@ adaptive icon with a monochrome layer for themed icons.
 
 ## 5. Screens
 
-1. **Arena (Home):** today's mission card (Push/Pull/Recharge), window countdown, streak flame +
-   multiplier, ticking jackpot, daily wheel, bounty strip.
+1. **Arena (Home):** today's mission card (Push/Pull/Recharge), window countdown, the Core
+   crystal (grows with your streak), Resonance multiplier, meteor, quest strip.
 2. **Check-in:** body-map soreness tap → the engine adjusts today's mission.
-3. **Workout Player:** one exercise at a time. A giant rep-tap target, set roll after each set, a
-   rest timer with a mini-spin, effort rating at the end, then the crate.
-4. **Vault:** crates, slots, scratch cards, wagers.
-5. **Collection:** card binder with holo tilt (gyroscope).
+3. **Workout Player:** one exercise at a time. A giant rep-tap target, a spark after each set, a
+   rest timer, effort rating at the end, then the geode.
+4. **Forge:** crack geodes, polish stones, fuse crystals, set Pledges.
+5. **Cabinet:** the crystal collection, refracting light as you tilt the phone (gyroscope).
 6. **Journey:** a board-game path to the endgame goals, charts of reps/weight over time, and a
    "You vs Ghost of 28" comparison.
-7. **Settings:** windows, equipment/weights, intensity, sound, haptics.
-8. **Home-screen widget:** streak, today's mission, jackpot, and a "Home for lunch" button.
+7. **Settings:** windows, equipment/weights, intensity, sound, haptics. A Workshop tab holds cosmetics.
+8. **Home-screen widget:** the Core, today's mission, streak, and a "Home for lunch" button.
 
 ---
 
@@ -191,8 +195,8 @@ adaptive icon with a monochrome layer for themed icons.
 
 | Pass | Delivers |
 |---|---|
-| **1. Core loop** | Project + CI + icon + theme; living background; Arena; Check-in; Workout Player with rep taps, set rolls and basic crate; program engine + progression; streaks; reminders. *Installable and usable from day one.* |
-| **2. Casino** | Full economy: wheel, slots, scratch cards, jackpot, wagers, pity, happy hour, bounties, season track, card collection, synthesized SFX, haptic patterns. |
+| **1. Core loop** | Project + CI + icon + theme; living background; Arena; Check-in; Workout Player with rep taps, sparks and a basic geode; program engine + progression; streaks; reminders. *Installable and usable from day one.* |
+| **2. Crystals** | The full reward system: geodes with bad-luck protection, Polish, Meteor, Forge, the Core + blooms, Pledges, Shields, Aurora, Quests, Expedition, Cabinet, Workshop, synthesized SFX, haptic patterns. |
 | **3. Motion polish** | Shader backgrounds, shared-element morphs, full effects library, odometers everywhere, intensity setting, widget, Journey screen. |
 | **4. Tuning** | Balance drop rates and progression against your real logs; fix whatever feels flat or annoying. |
 
