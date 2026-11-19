@@ -45,7 +45,7 @@ def prompt_tail_zh(tag):
             + POSE + COSTUME_V1 + EMBLEM_V1 + END + "\n\n" + LADDER_ZH[tag])
 
 
-def main(only=None, out="02_physique_ladder.json", label="round 2"):
+def main(only=None, out="02_physique_ladder.json", label="round 2", pre="r2"):
     import json
     wf = Workflow()
     wf.note(f"DEFINE art test, {label}\n\nPress Run once: {3 * len(only or LADDER)} images.\n\n"
@@ -58,9 +58,9 @@ def main(only=None, out="02_physique_ladder.json", label="round 2"):
         
             "Paste the results here; seeds are fixed, so screenshots or webp are fine.")
     for i, (tag, build) in enumerate([l for l in LADDER if not only or l[0] in only]):
-        wf.t2i(prompt(build), SEED, f"define/r2A_{tag}", (400 + i * 1150, 0), f"A {tag}")
-        wf.t2i(prompt_tail(build), SEED, f"define/r2B_{tag}", (400 + i * 1150, 620), f"B {tag}")
-        wf.t2i(prompt_tail_zh(tag), SEED, f"define/r2C_{tag}", (400 + i * 1150, 1240), f"C {tag}")
+        wf.t2i(prompt(build), SEED, f"define/{pre}A_{tag}", (400 + i * 1150, 0), f"A {tag}")
+        wf.t2i(prompt_tail(build), SEED, f"define/{pre}B_{tag}", (400 + i * 1150, 620), f"B {tag}")
+        wf.t2i(prompt_tail_zh(tag), SEED, f"define/{pre}C_{tag}", (400 + i * 1150, 1240), f"C {tag}")
     wf.group("Row A: build words near the start", (380, -50, 5750, 560))
     wf.group("Row B: build words last", (380, 570, 5750, 560))
     wf.group("Row C: build words last, in Chinese", (380, 1190, 5750, 560))
@@ -74,4 +74,4 @@ def main(only=None, out="02_physique_ladder.json", label="round 2"):
 
 if __name__ == "__main__":
     main()
-    main(only={"s1_untrained", "s2_average"}, out="02b_low_end_reword.json", label="round 2b (reworded low-end stages)")
+    main(only={"s1_untrained", "s2_average"}, out="02b_low_end_reword.json", label="round 2b (reworded low-end stages)", pre="r2b")

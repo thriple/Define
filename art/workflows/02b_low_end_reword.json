@@ -418,7 +418,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2A_s1_untrained"
+    "define/r2bA_s1_untrained"
    ]
   },
   {
@@ -623,7 +623,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2B_s1_untrained"
+    "define/r2bB_s1_untrained"
    ]
   },
   {
@@ -828,7 +828,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2C_s1_untrained"
+    "define/r2bC_s1_untrained"
    ]
   },
   {
@@ -1033,7 +1033,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2A_s2_average"
+    "define/r2bA_s2_average"
    ]
   },
   {
@@ -1238,7 +1238,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2B_s2_average"
+    "define/r2bB_s2_average"
    ]
   },
   {
@@ -1443,7 +1443,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "define/r2C_s2_average"
+    "define/r2bC_s2_average"
    ]
   }
  ],
