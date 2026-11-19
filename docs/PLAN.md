@@ -1,6 +1,6 @@
 # DEFINE — Plan
 
-A loud, always-moving Android app that turns short arm/chest workouts into a crystal-hunting game
+A loud, always-moving Android app that turns short arm/chest workouts into levelling up a superhero
 you can't stop coming back to. The training side is deliberately conservative (a 40-something body heals slowly); the
 reward side is deliberately excessive (a 40-something brain still loves a surprise).
 
@@ -38,7 +38,7 @@ the mission to tomorrow. No penalty.
 3 sets per exercise, ~60–90 s rest. Weights assume dumbbells; the ladder past 30 lb needs heavier
 weights (see Open questions).
 
-| Exercise | Start | Milestones | Endgame ("Ghost of 28" boss) |
+| Exercise | Start | Milestones | Endgame ("Prime" boss) |
 |---|---|---|---|
 | Push-ups | 3 × 6 | 3×10 → 3×15 → 3×20 | **40 unbroken**, and **100 total in one session** |
 | Curls | 3 × 3 @ 30 lb | 3×10 @ 30 → 3×12 @ 30 → 3×6 @ 35 → 3×10 @ 35 | **3 × 8 strict @ 40 lb** |
@@ -58,8 +58,8 @@ prestige.
 - **Hold** when effort was Brutal or soreness was 3.
 - **Step back one** when a set wasn't finished or soreness hit 5.
 - **Deload every 5th week:** volume −40%, full rewards ("Recharge Week" with its own loot table).
-- **Missed 4+ days:** resume one step back, with a "Welcome Back" geode, never a guilt screen.
-- **Max tests** every 4 weeks for push-ups are staged as boss fights (boss health bar = target reps).
+- **Missed 4+ days:** resume one step back, with a "Welcome Back" supply pod, never a guilt screen.
+- **Max tests** every 4 weeks for push-ups are staged as villain fights (boss health bar = target reps).
 
 Rough timeline: ~2 sessions per group per week puts curls at 3×10 in about 5 weeks and the full
 endgame at roughly 5–7 months. The engine adapts to real data, so this is a forecast, not a promise.
@@ -82,51 +82,94 @@ endgame at roughly 5–7 months. The engine adapts to real data, so this is a fo
 
 ---
 
-## 3. The reward system: Crystals
+## 3. The reward system: your hero
 
-No casino imagery: no slots, wheels, chips or jackpots, and no real money, ads or purchases, ever.
-The *mechanics* that keep people coming back (random rewards, guaranteed drops, near-misses, streaks,
-collecting, commitments) live inside one theme: **you grow and crack open crystals.** The theme
-fits the name (a cut gem is all *defined* facets), and gems are made for bright, prismatic effects.
+No casino imagery and no real money, ads or purchases, ever. The *mechanics* that keep people coming
+back (random rewards, guaranteed drops, near-misses, streaks, collecting, commitments) live inside one
+theme: **you level up a superhero whose body tracks your real training.** Every logged rep fills out
+the hero's arms, chest and shoulders a little, so the character's physique *is* your progress bar.
+The hero and emblem are original: a masked comic-book hero whose emblem grows out of the dumbbell icon.
 
 ### What you earn
-- **XP** → Rank (Rookie → Iron → Steel → Titan → Mythic → *Defined*), with prestige after the endgame.
-- **Shards**: what you spend on Forge fusions and Workshop cosmetics.
-- **Geodes**: rough stones you crack open by tapping. Each one holds a crystal.
-- **Dust**: from duplicate crystals; turns into any crystal you're missing.
+- **XP** → Rank (Rookie → Vigilante → Hero → Champion → Legend → *Defined*), with prestige after the endgame.
+- **Power**: what you spend on gear upgrades and cosmetics.
+- **Supply pods**: crash-landed pods you tap open. Each one holds gear.
+- **Scrap**: from duplicate gear; turns into any piece you're missing.
 
-### Rarity = gemstone (each tier has its own full-screen effect)
-Quartz (white) · Aquamarine (cyan) · Amethyst (violet) · Topaz (gold) · **Opal** (prismatic, screen-wide).
+### Rarity (each tier has its own full-screen effect)
+Standard (white) · Enhanced (cyan) · Elite (violet) · Legendary (gold) · **Cosmic** (prismatic, screen-wide).
 
 ### Mechanics, by where they fire
 | Moment | Mechanic | (Psychology behind it) |
 |---|---|---|
-| Every rep tap | Pop + haptic; a **combo meter** with rising pitch (each tap a step up the scale) | Instant feedback |
-| Every completed set | **Spark**: a spark arcs off the rep target and lands as a shard. Usually Quartz, sometimes better, very rarely Topaz | Random rewards on an unpredictable schedule |
-| Mission complete | **Geode**: tap to crack it; fractures spread, light leaks through the cracks, then it bursts open | Opening a mystery box |
-| Bad luck protection | Geodes get visibly **denser and glowier** as you go: an Amethyst is guaranteed within 10, a Topaz within 40 | A guaranteed drop after a dry spell (often called a "pity timer") |
-| Done inside a window | **Polish**: rub a dull stone with your finger to reveal its colour. Morning stones polish to better gems (**Early-Bird**) | Reveal by scratching |
-| First open in a window | **Meteor**: a small meteor streaks across Home; tap to catch it | A daily login reward |
-| Any time | **Forge**: fuse 3 crystals into one, with a chance it jumps a rarity tier. The flicker toward the next colour that *almost* happens is the near-miss | Variable outcome + near-miss |
-| Every mission | **The Core**: a giant crystal at the centre of Home that grows with every workout. Any day it can **bloom**, a supernova that showers rewards. Longer streaks make a bloom more likely | Growing prize pool |
-| Streak | **Resonance**: the Core's glow multiplies rewards (1.0× → 3.0× at 30 days). Earnable **Shields** absorb one missed day automatically | Streak multiplier + loss aversion |
-| After a mission | **Pledge**: set a crystal into tomorrow's window. Train in the window and it grows a size; miss and it cracks (a Shield protects it) | Commitment device |
-| Random | **Aurora**: surprise 2× windows when the sky lights up, announced by notification and favouring the lunch hour | Surprise bonus |
-| Level up | **Cascade**: the old rank's crystal shatters and the shards rain down into rewards | Celebration |
-| Ongoing | **Cabinet**: ~60 named crystals in themed sets ("Deep Water", "Ironstone", "Starfall"), procedurally shaped, refracting light as you tilt the phone. Set-completion bonuses | Collecting |
-| 28-day cycle | **Expedition**: a 40-step path through biomes (caves → reef → glacier → volcano → orbit) with rewards along the way; a new expedition each month | Season pass |
-| Daily/weekly | **Quests**, e.g. "Train before 7:20", "3 mornings this week", "Perfect form week" | Short-term goals |
-| Milestones | **Boss fights** for max tests and the endgame goals | Big moments |
-| Workshop | Cosmetics: themes, rep-tap effects, particle trails, sound packs, geode skins | Something to spend on |
+| Every rep tap | Pop + haptic; a **combo meter** with rising pitch | Instant feedback |
+| Every completed set | **Power surge**: energy orbs fly into the hero. Usually small, sometimes a bigger drop, very rarely Legendary | Random rewards on an unpredictable schedule |
+| Mission complete | **Supply pod** crashes in; tap to crack it open | Opening a mystery box |
+| Bad-luck protection | Pods glow hotter the longer you go without a good drop: Elite guaranteed within 10, Legendary within 40 | Guaranteed drop after a dry spell |
+| Done inside a window | **Dawn Patrol**: a morning-window bonus reveal with better odds (**Early-Bird**) | Reveal bonus |
+| First open in a window | **Signal flare**: tap it as it streaks across Home | Daily login reward |
+| Any time | **Upgrade bench**: combine 3 pieces of gear into one, with a chance it jumps a rarity tier; the flicker toward the next tier that *almost* happens is the near-miss | Variable outcome + near-miss |
+| Every mission | **Charge meter**: fills with every workout. Any day it can overload into **GO SUPER**, a full-screen frenzy that showers rewards. Longer streaks make it likelier | Growing prize pool |
+| Streak | **Momentum**: the hero's aura multiplies rewards (1.0× → 3.0× at 30 days). Earnable **Force fields** absorb one missed day automatically | Streak multiplier + loss aversion |
+| After a mission | **Oath**: swear to train in tomorrow's window. Keep it and the reward doubles; break it and the oath shatters (a Force field protects it) | Commitment device |
+| Random | **Distress signal**: "The city needs you!" Surprise 2× windows, announced by notification and favouring the lunch hour | Surprise bonus |
+| Rank up | A full **transformation sequence**, the app's biggest motion-graphics moment | Celebration |
+| Ongoing | **Suit Locker**: capes, emblems, suit colours, visors, auras, in themed sets, with set-completion bonuses | Collecting |
+| 28-day cycle | **Comic issue**: each month is an issue; training unlocks its panels, 40 steps of rewards along the way | Season pass |
+| Daily/weekly | **Missions board**, e.g. "Train before 7:20", "3 mornings this week" | Short-term goals |
+| Milestones | **Villain fights**: **The Snooze** (morning-window boss), **Doctor DOMS** (soreness), **Couch Lord**, and the final boss **Prime**, your 28-year-old self | Big moments |
 
 ### Guardrails baked into the rewards
 - RECHARGE days and deload weeks pay full rewards, so resting is never the "losing" move.
 - Bonus reps beyond prescription are capped and pay nothing extra past +2.
-- A broken streak dims Resonance; it never takes away banked shards or crystals.
+- A broken streak dims Momentum; it never takes away banked Power or gear.
 
 ---
 
-## 4. Look and motion
+## 4. Art pipeline
+
+Organic character art is not something code-drawn shapes can do well, so the work is split:
+
+- **ComfyUI on your PC draws the hero** (via Pinokio, on your GPU). Image models are good at
+  anatomy and style.
+- **Claude does the code:** builds and runs the ComfyUI workflows, checks consistency, cleans up
+  assets, and writes all the motion.
+- **You are the art director.** Nothing goes into the app without your approval.
+- **No step depends on Claude placing pixels by eye.** Cut-outs use a background-removal model,
+  layer splits use a segmentation model, and stage alignment uses an image-registration algorithm.
+
+### How Claude reaches ComfyUI
+This session runs in a cloud container and can't see your PC directly. Either:
+1. **Connect a folder on your PC to the session** (Claude desktop app → Settings → Claude Code →
+   Remote Control). Claude can then run commands on your PC and drive ComfyUI's built-in local HTTP
+   API (`/prompt`, `/history`, `/view`). No MCP setup needed; Pinokio only changes which port it's on.
+2. **Run the art step from a Claude session on your PC** (desktop app, or `claude remote-control` in
+   the Define folder). The ComfyUI MCP server can then be added locally if wanted, though the plain
+   HTTP API is enough.
+
+### Steps
+1. **Character bible.** One master image in a fixed bold comic-book style, plus written rules for
+   colours, proportions, outfit and emblem.
+2. **Physique ladder.** The same hero, pose and framing at 5–6 stages from day one to Prime, with
+   small steps between them so they blend. Consistency comes from an image-edit model working from
+   the master image, plus a pose-lock (ControlNet pose/depth) so every stage lines up.
+3. **Poses.** Idle, flex and power-up per stage: about 15–18 images.
+4. **Layers.** Automatic split into figure, cape and glow areas (eyes, emblem, aura).
+5. **Motion (code).** Mesh warping for breathing and flexing (Android can bend a bitmap like a rubber
+   sheet), wind ripple on the cape, depth-based tilt parallax, glow on eyes/emblem, particles,
+   lighting sweeps, comic-panel transitions.
+6. **Gear without multiplying the art.** Suit colours via automatic recolouring of the suit area;
+   emblems as flat geometric graphics; auras and powers as code effects. Only capes, villains and
+   comic panels need new generated images.
+
+### Art test (gate before any app code depends on the art)
+Character bible + physique ladder + one animated pose in a browser page you can open on your phone.
+If it doesn't hit your bar, the reward system falls back to the crystal theme (geometric gems and
+light effects, which code can render convincingly).
+
+---
+
+## 5. Look and motion
 
 **Palette.** Saturated colours on a deep ink base so they glow: hot magenta `#FF2E93`, electric
 cyan `#00E5FF`, acid lime `#C6FF00`, sunburst orange `#FF8A00`, ultraviolet `#7C4DFF`, ink
@@ -136,17 +179,19 @@ and neon in the evening.
 **Type.** A chunky display face (Bungee or Archivo Black, OFL licensed) for numbers and headlines,
 plus a clean sans for body text.
 
+**Comic-book layer.** Halftone dots, speed lines, starbursts and onomatopoeia ("POW", "SURGE") as
+code effects; screen transitions as comic panels sliding, tearing and zooming.
+
 **Nothing is ever still.**
 - A living background: animated mesh gradient (AGSL shader on Android 13+, Canvas fallback below)
   with drifting particles.
+- The hero idles, breathes, and reacts to every set.
 - Buttons breathe, squash and stretch on press, and fire a haptic tick.
 - Every number rolls like an odometer.
-- Transitions: the mission card morphs into the workout player; radial wipes; zoom-blur between
-  major screens.
-- **Full-screen effects library:** confetti cannon, shockwave rings, shard fountains, god-rays,
-  fireworks, lightning, screen shake, and a colour-split flash for Topaz/Opal.
-- **Sound:** synthesized in code (AudioTrack), so there are no asset licences. Arpeggios, crystal
-  chimes, cracking stone, and a big swell when the Core blooms.
+- **Full-screen effects library:** confetti cannon, shockwave rings, energy fountains, god-rays,
+  fireworks, lightning, screen shake, and a colour-split flash for Legendary/Cosmic.
+- **Sound:** synthesized in code (AudioTrack), so there are no asset licences. Power-up arpeggios,
+  impacts, whooshes, and a big swell for GO SUPER.
 - **Haptics:** composed vibration patterns (Android 11+) with fallbacks.
 - **Intensity setting:** Chill / **Hype** (default) / Absolutely Unhinged. A global mute is
   available for when you're near other people.
@@ -156,23 +201,22 @@ adaptive icon with a monochrome layer for themed icons.
 
 ---
 
-## 5. Screens
+## 6. Screens
 
-1. **Arena (Home):** today's mission card (Push/Pull/Recharge), window countdown, the Core
-   crystal (grows with your streak), Resonance multiplier, meteor, quest strip.
+1. **HQ (Home):** the hero front and centre, today's mission card (Push/Pull/Recharge), window
+   countdown, charge meter, Momentum, signal flare, missions board.
 2. **Check-in:** body-map soreness tap → the engine adjusts today's mission.
-3. **Workout Player:** one exercise at a time. A giant rep-tap target, a spark after each set, a
-   rest timer, effort rating at the end, then the geode.
-4. **Forge:** crack geodes, polish stones, fuse crystals, set Pledges.
-5. **Cabinet:** the crystal collection, refracting light as you tilt the phone (gyroscope).
-6. **Journey:** a board-game path to the endgame goals, charts of reps/weight over time, and a
-   "You vs Ghost of 28" comparison.
-7. **Settings:** windows, equipment/weights, intensity, sound, haptics. A Workshop tab holds cosmetics.
-8. **Home-screen widget:** the Core, today's mission, streak, and a "Home for lunch" button.
+3. **Workout Player:** one exercise at a time. A giant rep-tap target, a power surge after each set,
+   a rest timer, effort rating at the end, then the supply pod.
+4. **Armory:** open pods, Dawn Patrol reveals, upgrade bench, Oaths.
+5. **Suit Locker:** gear collection; dress the hero.
+6. **Journey:** the comic issue, villain fights, charts of reps/weight over time, and "You vs Prime".
+7. **Settings:** windows, equipment/weights, intensity, sound, haptics.
+8. **Home-screen widget:** the hero, today's mission, streak, and a "Home for lunch" button.
 
 ---
 
-## 6. Technical architecture
+## 7. Technical architecture
 
 - **Kotlin + Jetpack Compose**, single Activity, a small hand-rolled back stack (no navigation
   library), minSdk 26 / targetSdk 36.
@@ -180,8 +224,8 @@ adaptive icon with a monochrome layer for themed icons.
   database dependency.
 - **`engine/` is pure Kotlin** (ProgramEngine, StreakEngine, RewardEngine with seeded RNG/drop
   tables/pity, Economy), unit-tested locally before every push.
-- **Effects:** a reusable Compose particle system on `Canvas`, plus AGSL `RuntimeShader` effects
-  gated to API 33+.
+- **Effects:** a reusable Compose particle system on `Canvas`, `Canvas.drawBitmapMesh` for hero
+  warping, plus AGSL `RuntimeShader` effects gated to API 33+.
 - **Reminders:** AlarmManager + BootReceiver + notification channel with actions.
 - **Widget:** Jetpack Glance.
 - **Build/delivery:** GitHub Actions builds the APK on every push and publishes it to the repo's
@@ -191,18 +235,21 @@ adaptive icon with a monochrome layer for themed icons.
 
 ---
 
-## 7. Build passes
+## 8. Build passes
 
 | Pass | Delivers |
 |---|---|
-| **1. Core loop** | Project + CI + icon + theme; living background; Arena; Check-in; Workout Player with rep taps, sparks and a basic geode; program engine + progression; streaks; reminders. *Installable and usable from day one.* |
-| **2. Crystals** | The full reward system: geodes with bad-luck protection, Polish, Meteor, Forge, the Core + blooms, Pledges, Shields, Aurora, Quests, Expedition, Cabinet, Workshop, synthesized SFX, haptic patterns. |
-| **3. Motion polish** | Shader backgrounds, shared-element morphs, full effects library, odometers everywhere, intensity setting, widget, Journey screen. |
+| **0. Art test** | Character bible, physique ladder, one animated pose in a browser page. Go/no-go on the hero. |
+| **1. Core loop** | Project + CI + icon + theme; living background; HQ; Check-in; Workout Player with rep taps, power surges and a basic pod; program engine + progression; streaks; reminders. Placeholder hero if the art isn't ready. *Installable and usable from day one.* |
+| **2. Rewards** | Full reward system: pods with bad-luck protection, Dawn Patrol, signal flare, upgrade bench, charge meter + GO SUPER, Oaths, Force fields, Distress signals, missions board, comic issue, Suit Locker, synthesized SFX, haptic patterns. |
+| **3. Motion polish** | Animated hero, shader backgrounds, comic transitions, full effects library, odometers everywhere, intensity setting, widget, Journey screen, villain fights. |
 | **4. Tuning** | Balance drop rates and progression against your real logs; fix whatever feels flat or annoying. |
+
+Pass 0 and pass 1 can run side by side: the app code doesn't wait on the art.
 
 ---
 
-## 8. Open questions
+## 9. Open questions
 
 1. **Equipment:** one 30 lb dumbbell or a pair? Anything heavier or adjustable, or resistance bands
    / a pull-up bar? (This decides the weight ladder past 30 lb.)
@@ -210,3 +257,5 @@ adaptive icon with a monochrome layer for themed icons.
 3. **Weekends:** same windows, or different ones?
 4. **Sound:** on by default, or haptics-only until you turn it up?
 5. **Phone:** roughly what model/Android version? (Decides how much of the shader work you'll see.)
+6. **ComfyUI:** which GPU, and which models are installed (any image-edit model such as Flux Kontext
+   or Qwen-Image-Edit, and ControlNet)? What port does Pinokio show for ComfyUI?
