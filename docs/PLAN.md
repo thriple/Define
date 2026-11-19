@@ -86,8 +86,10 @@ endgame at roughly 5–7 months. The engine adapts to real data, so this is a fo
 
 No casino imagery and no real money, ads or purchases, ever. The *mechanics* that keep people coming
 back (random rewards, guaranteed drops, near-misses, streaks, collecting, commitments) live inside one
-theme: **you level up a superhero whose body tracks your real training.** Every logged rep fills out
-the hero's arms, chest and shoulders a little, so the character's physique *is* your progress bar.
+theme: **you level up a superhero whose body tracks your real training.** The body comes in about 8
+stages driven by your real progression. Each new stage is **unlocked as an event**: a full-screen
+transformation sequence (flash, shockwave, the bigger hero revealed). It is deliberately *not* a slow
+invisible morph: every visible change should land as a reward moment.
 The hero and emblem are original: a masked comic-book hero whose emblem grows out of the dumbbell icon.
 
 ### What you earn
@@ -148,11 +150,13 @@ This session runs in a cloud container and can't see your PC directly. Either:
    HTTP API is enough.
 
 ### Steps
-1. **Character bible.** One master image in a fixed bold comic-book style, plus written rules for
-   colours, proportions, outfit and emblem.
-2. **Physique ladder.** The same hero, pose and framing at 5–6 stages from day one to Prime, with
-   small steps between them so they blend. Consistency comes from an image-edit model working from
-   the master image, plus a pose-lock (ControlNet pose/depth) so every stage lines up.
+1. **Character bible.** Chosen: stylized 3D render style, magenta/navy suit, orange cape, domino mask
+   with cyan lenses, dumbbell emblem (round 1, `D_3d v1_cape`, seed 4001).
+2. **Physique ladder.** 8 stages from day one to Prime. Method that worked (rounds 2–5): identical
+   prompt with the physique as the *last* sentence, two length-matched extremes (scrawny / hugely
+   muscular), and the stages in between as blends of the two text encodings (ConditioningAverage),
+   re-spaced so each step looks equally big. Small stance/belt drift between stages is fine because
+   stages are revealed through a transformation effect, never morphed.
 3. **Poses.** Idle, flex and power-up per stage: about 15–18 images.
 4. **Layers.** Automatic split into figure, cape and glow areas (eyes, emblem, aura).
 5. **Motion (code).** Mesh warping for breathing and flexing (Android can bend a bitmap like a rubber
