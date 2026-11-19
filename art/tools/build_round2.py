@@ -19,8 +19,8 @@ def prompt(build, emblem=EMBLEM_V1, extra=""):
             + POSE + COSTUME_V1 + emblem + extra + END)
 
 LADDER = [
-    ("s1_untrained", "a slim, untrained build, thin arms and a narrow chest"),
-    ("s2_average", "an average build, slightly toned arms"),
+    ("s1_untrained", "a skinny, out-of-shape build: thin noodle arms, narrow sloping shoulders, a flat chest and a slightly soft belly"),
+    ("s2_average", "a lean build with lightly toned arms and slightly broader shoulders"),
     ("s3_athletic", "an athletic build"),  # identical to round 1 -> should reproduce it exactly
     ("s4_muscular", "a muscular build, strong defined arms, broad shoulders and a solid chest"),
     ("s5_prime", "a powerfully muscular heroic build, big arms, very broad shoulders and a deep chest"),
@@ -32,8 +32,8 @@ def prompt_tail(build):
 # Same stages, physique sentence in Chinese (Z-Image was trained bilingually; its Qwen3 encoder is
 # natively strong in Chinese, and English body-type vocabulary can have gaps).
 LADDER_ZH = {
-    "s1_untrained": "他的体型：身材瘦弱，从未锻炼过，手臂细瘦，胸膛狭窄。",
-    "s2_average": "他的体型：普通身材，手臂略有线条。",
+    "s1_untrained": "他的体型：瘦弱又缺乏锻炼，手臂细得像面条，肩膀窄而下垂，胸部扁平，肚子有点软。",
+    "s2_average": "他的体型：偏瘦但略有锻炼，手臂有一点线条，肩膀稍微宽一些。",
     "s3_athletic": "他的体型：匀称健美的运动员身材。",
     "s4_muscular": "他的体型：肌肉发达，手臂粗壮结实，肩膀宽阔，胸肌厚实。",
     "s5_prime": "他的体型：极其强壮的超级英雄身材，手臂肌肉巨大，肩膀非常宽阔，胸肌非常厚实饱满。",
