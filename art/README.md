@@ -17,7 +17,7 @@ to `art/inbox/<round>/`. Claude reviews them, cleans them up and builds the moti
 | # | Workflow | Goal |
 |---|---|---|
 | 1 | `01_style_explore.json` | Grid: 4 styles (comic, pop art, animated series, 3D) × 3 costumes (cape, cowl, sleeveless). Pick a style and a costume direction. |
-| 2 | *(next)* | Costume and design variations in the chosen style. Lock the character bible. |
+| 2 | `02_physique_ladder.json` | Chosen design (D_3d v1_cape, seed 4001): 5 body stages by changing only the build words. Tests whether the hero stays consistent without pose control. |
 | 3 | *(next)* | Physique ladder: same pose locked with the Z-Image ControlNet, from day one to Prime. |
 | 4 | *(next)* | Poses (idle, flex, power-up) and layer separation. |
 
