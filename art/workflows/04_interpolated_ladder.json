@@ -229,7 +229,7 @@
     "Node name for S&R": "Note"
    },
    "widgets_values": [
-    "DEFINE art test, round 4: interpolated physique ladder\n\nPress Run once: 12 images (2 rows x 6 stages).\n\nOnly the two extremes are written as text. Stages in between blend the two encodings: m00 = fully scrawny, m100 = fully muscular.\n\nRow EN: physique sentence in English. Row ZH: in Chinese.\n\nCheck: even steps between stages? Pose/costume/face steady?"
+    "DEFINE art test, round 4: interpolated physique ladder\n\nPress Run once: 12 images.\n\nOnly the two extremes are written as text. Stages in between blend the two encodings: m00 = fully scrawny, m100 = fully muscular.\n\nRows: physique sentence in English (EN) / Chinese (ZH).\n\nCheck: even steps between stages? Pose/costume/face steady?"
    ]
   },
   {
