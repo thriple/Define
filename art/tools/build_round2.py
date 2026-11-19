@@ -29,21 +29,41 @@ def prompt_tail(build):
     return (STYLE_3D + "\n\nFull-body character design of an original superhero, an adult man "
             + POSE + COSTUME_V1 + EMBLEM_V1 + END + "\n\nHis physique: " + build + ".")
 
+# Same stages, physique sentence in Chinese (Z-Image was trained bilingually; its Qwen3 encoder is
+# natively strong in Chinese, and English body-type vocabulary can have gaps).
+LADDER_ZH = {
+    "s1_untrained": "他的体型：身材瘦弱，从未锻炼过，手臂细瘦，胸膛狭窄。",
+    "s2_average": "他的体型：普通身材，手臂略有线条。",
+    "s3_athletic": "他的体型：匀称健美的运动员身材。",
+    "s4_muscular": "他的体型：肌肉发达，手臂粗壮结实，肩膀宽阔，胸肌厚实。",
+    "s5_prime": "他的体型：极其强壮的超级英雄身材，手臂肌肉巨大，肩膀非常宽阔，胸肌非常厚实饱满。",
+}
+
+
+def prompt_tail_zh(tag):
+    return (STYLE_3D + "\n\nFull-body character design of an original superhero, an adult man "
+            + POSE + COSTUME_V1 + EMBLEM_V1 + END + "\n\n" + LADDER_ZH[tag])
+
+
 def main():
     import json
     wf = Workflow()
-    wf.note("DEFINE art test, round 2\n\nPress Run once: 10 images.\n\n"
+    wf.note("DEFINE art test, round 2\n\nPress Run once: 15 images.\n\n"
             "Row A: build words near the start of the prompt (round 1 structure). "
             "A s3_athletic is the control and should match round 1 exactly.\n\n"
             "Row B: identical prompt text with the build as the LAST sentence, so everything before it "
-            "encodes identically. Compare drift between rows.\n\n"
+            "encodes identically.\n\n"
+            "Row C: same as B, but the physique sentence is in Chinese.\n\n"
+            "Compare drift (pose, framing, costume, face) and how much the body actually changes.\n\n"
         
             "Paste the results here; seeds are fixed, so screenshots or webp are fine.")
     for i, (tag, build) in enumerate(LADDER):
         wf.t2i(prompt(build), SEED, f"define/r2A_{tag}", (400 + i * 1150, 0), f"A {tag}")
         wf.t2i(prompt_tail(build), SEED, f"define/r2B_{tag}", (400 + i * 1150, 620), f"B {tag}")
+        wf.t2i(prompt_tail_zh(tag), SEED, f"define/r2C_{tag}", (400 + i * 1150, 1240), f"C {tag}")
     wf.group("Row A: build words near the start", (380, -50, 5750, 560))
     wf.group("Row B: build words last", (380, 570, 5750, 560))
+    wf.group("Row C: build words last, in Chinese", (380, 1190, 5750, 560))
     wf.save(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "02_physique_ladder.json")
 
     r1 = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "01_style_explore.json"))

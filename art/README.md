@@ -17,7 +17,7 @@ to `art/inbox/<round>/`. Claude reviews them, cleans them up and builds the moti
 | # | Workflow | Goal |
 |---|---|---|
 | 1 | `01_style_explore.json` | Grid: 4 styles (comic, pop art, animated series, 3D) × 3 costumes (cape, cowl, sleeveless). Pick a style and a costume direction. |
-| 2 | `02_physique_ladder.json` | 5 body stages from the chosen design (D_3d v1_cape, seed 4001), two prompt structures: A = build words near the start, B = build words as the last sentence (causal text encoder, so everything before encodes identically). Compare drift. |
+| 2 | `02_physique_ladder.json` | 5 body stages from the chosen design (D_3d v1_cape, seed 4001), two prompt structures: A = build words near the start, B = build words as the last sentence (causal text encoder, so everything before encodes identically). Row C = same as B with the physique sentence in Chinese. Compare drift. |
 | 3 | `03_pose_locked_ladder.json` | Fallback if prompt structure isn't enough: image-to-image from the chosen hero with a DWPose skeleton locking the pose via the Z-Image Fun ControlNet. Needs controlnet_aux + the 2.9 GB model patch. |
 | 4 | *(next)* | Poses (idle, flex, power-up) and layer separation. |
 
