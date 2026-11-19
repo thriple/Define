@@ -1,21 +1,37 @@
 """Builds art/workflows/01_style_explore.json (ComfyUI UI-format workflow).
 
-Same original hero + costume rendered in four art styles with Z-Image Turbo,
-so the choice is about style, not costume. Settings mirror Comfy's official
+A grid of the same original hero: four art styles (rows) x three costumes
+(columns), one image each, all in a single run, with Z-Image Turbo. Settings mirror Comfy's official
 Z-Image Turbo template (8 steps, cfg 1, res_multistep/simple, AuraFlow shift 3).
 """
 import json, pathlib
 
-HERO = (
+BASE = (
     "Full-body character design of an original superhero, an adult man with an athletic build, "
     "standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed "
     "and held slightly away from his body, the whole figure visible from head to toe with empty space "
-    "around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan "
-    "accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that "
-    "hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short "
-    "dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. "
-    "Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+    "around it. "
 )
+END = " Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+
+# Z-Image Turbo barely varies between seeds, so variety comes from the prompt, not the seed.
+COSTUMES = [
+    ("v1_cape",
+     "He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines "
+     "along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind "
+     "his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. "
+     "On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond."),
+    ("v2_cowl",
+     "He wears a deep navy suit with hot magenta armour panels on the chest, shoulders and shins, thin "
+     "glowing cyan seams, and no cape. A full navy cowl covers his head, with a single wide glowing cyan "
+     "visor across the eyes. On his chest is a bold geometric emblem: a white diagonal dumbbell inside an "
+     "orange circle."),
+    ("v3_sleeveless",
+     "He wears a sleeveless hot magenta and sunset-orange suit that leaves his arms bare, chunky navy "
+     "gauntlets on his forearms, a navy belt, navy boots, and no cape. A navy half-mask covers the upper "
+     "face, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a "
+     "white diagonal dumbbell inside a navy diamond with a cyan outline."),
+]
 
 STYLES = [
     ("A_comic", 1001,
@@ -32,7 +48,7 @@ STYLES = [
      "material, appealing stylized proportions, high-end animation studio quality."),
 ]
 
-W, H, BATCH = 832, 1216, 2
+W, H, BATCH = 832, 1216, 1
 
 nodes, links = [], []
 _link = [0]
@@ -65,7 +81,7 @@ note = node(1, "Note", (-420, 0), (380, 420), [
     "DEFINE art test, round 1: style exploration\n\n"
     "1. If a model box below is red, click it and pick your Z-Image Turbo files "
     "(diffusion model, qwen_3_4b text encoder, ae VAE).\n"
-    "2. Press Queue (Run) twice. Each run makes 2 images per style = 8 images.\n"
+    "2. Press Run once. It makes 12 images: 4 styles x 3 costumes.\n"
     "3. Outputs land in ComfyUI/output/define/.\n"
     "4. Upload the PNGs (originals, not screenshots: they carry the seeds) to "
     "art/inbox/round1 on the GitHub branch, or paste your favourites into chat."
@@ -80,23 +96,24 @@ link(unet, 0, msaf, "model")
 groups = []
 nid = 10
 for row, (tag, seed, style) in enumerate(STYLES):
-    y = row * 520
-    x0 = 400
-    te = node(nid, "CLIPTextEncode", (x0, y), (440, 300), [style + "\n\n" + HERO],
-              inputs=[("clip", "CLIP")], outputs=[("CONDITIONING", "CONDITIONING")], title=f"Prompt {tag}")
-    zo = node(nid + 1, "ConditioningZeroOut", (x0, y + 340), (240, 26),
-              inputs=[("conditioning", "CONDITIONING")], outputs=[("CONDITIONING", "CONDITIONING")])
-    ks = node(nid + 2, "KSampler", (x0 + 480, y), (300, 262), [seed, "increment", 8, 1, "res_multistep", "simple", 1],
-              inputs=[("model", "MODEL"), ("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent_image", "LATENT")],
-              outputs=[("LATENT", "LATENT")])
-    de = node(nid + 3, "VAEDecode", (x0 + 480, y + 300), (200, 46),
-              inputs=[("samples", "LATENT"), ("vae", "VAE")], outputs=[("IMAGE", "IMAGE")])
-    sv = node(nid + 4, "SaveImage", (x0 + 820, y), (420, 480), [f"define/r1_{tag}"], inputs=[("images", "IMAGE")])
-    link(clip, 0, te, "clip"); link(te, 0, zo, "conditioning")
-    link(msaf, 0, ks, "model"); link(te, 0, ks, "positive"); link(zo, 0, ks, "negative"); link(latent, 0, ks, "latent_image")
-    link(ks, 0, de, "samples"); link(vae, 0, de, "vae"); link(de, 0, sv, "images")
-    groups.append({"title": f"Style {tag}", "bounding": [x0 - 20, y - 50, 1300, 520], "color": "#3f789e", "font_size": 24})
-    nid += 10
+    y = row * 560
+    for col, (ctag, costume) in enumerate(COSTUMES):
+        x0 = 400 + col * 1150
+        te = node(nid, "CLIPTextEncode", (x0, y), (420, 300), [style + "\n\n" + BASE + costume + END],
+                  inputs=[("clip", "CLIP")], outputs=[("CONDITIONING", "CONDITIONING")], title=f"Prompt {tag} {ctag}")
+        zo = node(nid + 1, "ConditioningZeroOut", (x0, y + 340), (240, 26),
+                  inputs=[("conditioning", "CONDITIONING")], outputs=[("CONDITIONING", "CONDITIONING")])
+        ks = node(nid + 2, "KSampler", (x0 + 440, y), (300, 262), [seed + col, "fixed", 8, 1, "res_multistep", "simple", 1],
+                  inputs=[("model", "MODEL"), ("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent_image", "LATENT")],
+                  outputs=[("LATENT", "LATENT")])
+        de = node(nid + 3, "VAEDecode", (x0 + 440, y + 300), (200, 46),
+                  inputs=[("samples", "LATENT"), ("vae", "VAE")], outputs=[("IMAGE", "IMAGE")])
+        sv = node(nid + 4, "SaveImage", (x0 + 760, y), (340, 500), [f"define/r1_{tag}_{ctag}"], inputs=[("images", "IMAGE")])
+        link(clip, 0, te, "clip"); link(te, 0, zo, "conditioning")
+        link(msaf, 0, ks, "model"); link(te, 0, ks, "positive"); link(zo, 0, ks, "negative"); link(latent, 0, ks, "latent_image")
+        link(ks, 0, de, "samples"); link(vae, 0, de, "vae"); link(de, 0, sv, "images")
+        nid += 10
+    groups.append({"title": f"Style {tag}", "bounding": [380, y - 50, 3480, 560], "color": "#3f789e", "font_size": 24})
 
 wf = {
     "last_node_id": max(n["id"] for n in nodes), "last_link_id": _link[0],

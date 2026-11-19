@@ -16,7 +16,7 @@ to `art/inbox/<round>/`. Claude reviews them, cleans them up and builds the moti
 ## Rounds
 | # | Workflow | Goal |
 |---|---|---|
-| 1 | `01_style_explore.json` | Same hero and costume in 4 styles (comic, pop art, animated series, 3D). Pick a style. |
+| 1 | `01_style_explore.json` | Grid: 4 styles (comic, pop art, animated series, 3D) × 3 costumes (cape, cowl, sleeveless). Pick a style and a costume direction. |
 | 2 | *(next)* | Costume and design variations in the chosen style. Lock the character bible. |
 | 3 | *(next)* | Physique ladder: same pose locked with the Z-Image ControlNet, from day one to Prime. |
 | 4 | *(next)* | Poses (idle, flex, power-up) and layer separation. |
