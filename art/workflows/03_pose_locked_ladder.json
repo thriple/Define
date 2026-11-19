@@ -1,0 +1,2799 @@
+{
+ "last_node_id": 145,
+ "last_link_id": 81,
+ "nodes": [
+  {
+   "id": 2,
+   "type": "UNETLoader",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    320,
+    82
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "z_image_turbo_bf16.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "CLIPLoader",
+   "pos": [
+    0,
+    120
+   ],
+   "size": [
+    320,
+    106
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      10,
+      19,
+      28,
+      37,
+      46,
+      55,
+      64,
+      73
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_3_4b.safetensors",
+    "lumina2",
+    "default"
+   ]
+  },
+  {
+   "id": 4,
+   "type": "VAELoader",
+   "pos": [
+    0,
+    270
+   ],
+   "size": [
+    320,
+    58
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      5,
+      9,
+      17,
+      26,
+      35,
+      44,
+      53,
+      62,
+      71,
+      80
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "ae.safetensors"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    0,
+    370
+   ],
+   "size": [
+    320,
+    58
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      12,
+      21,
+      30,
+      39,
+      48,
+      57,
+      66,
+      75
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3
+   ]
+  },
+  {
+   "id": 6,
+   "type": "EmptySD3LatentImage",
+   "pos": [
+    0,
+    470
+   ],
+   "size": [
+    320,
+    106
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptySD3LatentImage"
+   },
+   "widgets_values": [
+    832,
+    1216,
+    1
+   ]
+  },
+  {
+   "id": 1,
+   "type": "Note",
+   "pos": [
+    -440,
+    0
+   ],
+   "size": [
+    420,
+    460
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "Note"
+   },
+   "widgets_values": [
+    "DEFINE art test, round 3: pose-locked physique ladder\n\nOne-time setup:\na) Manager > Custom Nodes > install \"ComfyUI's ControlNet Auxiliary Preprocessors\", restart.\nb) Put Z-Image-Turbo-Fun-Controlnet-Union.safetensors in models/model_patches.\nc) Update ComfyUI if the ModelPatchLoader node shows red.\n\nEach run:\n1. In Load Image, upload your round 1 pick (output/define/r1_D_3d_v1_cape_00001_.png).\n2. Press Run once: 8 images (4 stages x 2 strengths) + a skeleton preview.\n3. Paste results here, including the skeleton preview."
+   ]
+  },
+  {
+   "id": 100,
+   "type": "LoadImage",
+   "pos": [
+    -440,
+    520
+   ],
+   "size": [
+    320,
+    420
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      1,
+      8
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "r1_D_3d_v1_cape_00001_.png",
+    "image"
+   ]
+  },
+  {
+   "id": 101,
+   "type": "DWPreprocessor",
+   "pos": [
+    -440,
+    980
+   ],
+   "size": [
+    320,
+    250
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      2,
+      6
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "POSE_KEYPOINT",
+     "type": "POSE_KEYPOINT",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "DWPreprocessor"
+   },
+   "widgets_values": [
+    "enable",
+    "enable",
+    "disable",
+    1024,
+    "yolox_l.torchscript.pt",
+    "dw-ll_ucoco_384_bs5.torchscript.pt",
+    "disable"
+   ]
+  },
+  {
+   "id": 102,
+   "type": "PreviewImage",
+   "pos": [
+    -440,
+    1270
+   ],
+   "size": [
+    320,
+    420
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 2
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "PreviewImage"
+   },
+   "widgets_values": [],
+   "title": "Skeleton preview"
+  },
+  {
+   "id": 103,
+   "type": "ModelPatchLoader",
+   "pos": [
+    0,
+    620
+   ],
+   "size": [
+    320,
+    58
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL_PATCH",
+     "type": "MODEL_PATCH",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelPatchLoader"
+   },
+   "widgets_values": [
+    "Z-Image-Turbo-Fun-Controlnet-Union.safetensors"
+   ]
+  },
+  {
+   "id": 104,
+   "type": "QwenImageDiffsynthControlnet",
+   "pos": [
+    0,
+    720
+   ],
+   "size": [
+    320,
+    140
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 3
+    },
+    {
+     "name": "model_patch",
+     "type": "MODEL_PATCH",
+     "link": 4
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 5
+    },
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 6
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      7
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "QwenImageDiffsynthControlnet"
+   },
+   "widgets_values": [
+    0.8
+   ],
+   "title": "Pose lock (strength)"
+  },
+  {
+   "id": 105,
+   "type": "VAEEncode",
+   "pos": [
+    0,
+    900
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pixels",
+     "type": "IMAGE",
+     "link": 8
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 9
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      15,
+      24,
+      33,
+      42,
+      51,
+      60,
+      69,
+      78
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 106,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 10
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      11,
+      13
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a slim, untrained build, thin arms and a narrow chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s1_untrained denoise 0.55"
+  },
+  {
+   "id": 107,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    400,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 108,
+   "type": "KSampler",
+   "pos": [
+    840,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 12
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 13
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 14
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      16
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.55
+   ]
+  },
+  {
+   "id": 109,
+   "type": "VAEDecode",
+   "pos": [
+    840,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 16
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      18
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 110,
+   "type": "SaveImage",
+   "pos": [
+    1160,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 18
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s1_untrained_d55"
+   ]
+  },
+  {
+   "id": 111,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1550,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 19
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      20,
+      22
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with an average build, slightly toned arms, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s2_average denoise 0.55"
+  },
+  {
+   "id": 112,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1550,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 20
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      23
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 113,
+   "type": "KSampler",
+   "pos": [
+    1990,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 21
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 22
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 23
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 24
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      25
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.55
+   ]
+  },
+  {
+   "id": 114,
+   "type": "VAEDecode",
+   "pos": [
+    1990,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 20,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 25
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 26
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      27
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 115,
+   "type": "SaveImage",
+   "pos": [
+    2310,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 27
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s2_average_d55"
+   ]
+  },
+  {
+   "id": 116,
+   "type": "CLIPTextEncode",
+   "pos": [
+    2700,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 22,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 28
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      29,
+      31
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a muscular build, strong defined arms, broad shoulders and a solid chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s4_muscular denoise 0.55"
+  },
+  {
+   "id": 117,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    2700,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 23,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 29
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      32
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 118,
+   "type": "KSampler",
+   "pos": [
+    3140,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 24,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 30
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 31
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 32
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 33
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      34
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.55
+   ]
+  },
+  {
+   "id": 119,
+   "type": "VAEDecode",
+   "pos": [
+    3140,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 25,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 34
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 35
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      36
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 120,
+   "type": "SaveImage",
+   "pos": [
+    3460,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 26,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 36
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s4_muscular_d55"
+   ]
+  },
+  {
+   "id": 121,
+   "type": "CLIPTextEncode",
+   "pos": [
+    3850,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 27,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 37
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      38,
+      40
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a powerfully muscular heroic build, big arms, very broad shoulders and a deep chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s5_prime denoise 0.55"
+  },
+  {
+   "id": 122,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    3850,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 28,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 38
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      41
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 123,
+   "type": "KSampler",
+   "pos": [
+    4290,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 29,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 39
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 40
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 41
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 42
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      43
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.55
+   ]
+  },
+  {
+   "id": 124,
+   "type": "VAEDecode",
+   "pos": [
+    4290,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 30,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 43
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 44
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      45
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 125,
+   "type": "SaveImage",
+   "pos": [
+    4610,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 31,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 45
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s5_prime_d55"
+   ]
+  },
+  {
+   "id": 126,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    600
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 32,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 46
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      47,
+      49
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a slim, untrained build, thin arms and a narrow chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s1_untrained denoise 0.75"
+  },
+  {
+   "id": 127,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    400,
+    940
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 33,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 47
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      50
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 128,
+   "type": "KSampler",
+   "pos": [
+    840,
+    600
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 34,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 48
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 49
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 50
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 51
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      52
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.75
+   ]
+  },
+  {
+   "id": 129,
+   "type": "VAEDecode",
+   "pos": [
+    840,
+    900
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 35,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 52
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 53
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      54
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 130,
+   "type": "SaveImage",
+   "pos": [
+    1160,
+    600
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 36,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 54
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s1_untrained_d75"
+   ]
+  },
+  {
+   "id": 131,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1550,
+    600
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 37,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 55
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      56,
+      58
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with an average build, slightly toned arms, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s2_average denoise 0.75"
+  },
+  {
+   "id": 132,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1550,
+    940
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 38,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 56
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      59
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 133,
+   "type": "KSampler",
+   "pos": [
+    1990,
+    600
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 39,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 57
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 58
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 59
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 60
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      61
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.75
+   ]
+  },
+  {
+   "id": 134,
+   "type": "VAEDecode",
+   "pos": [
+    1990,
+    900
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 40,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 61
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 62
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      63
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 135,
+   "type": "SaveImage",
+   "pos": [
+    2310,
+    600
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 41,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 63
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s2_average_d75"
+   ]
+  },
+  {
+   "id": 136,
+   "type": "CLIPTextEncode",
+   "pos": [
+    2700,
+    600
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 42,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 64
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      65,
+      67
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a muscular build, strong defined arms, broad shoulders and a solid chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s4_muscular denoise 0.75"
+  },
+  {
+   "id": 137,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    2700,
+    940
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 43,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 65
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      68
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 138,
+   "type": "KSampler",
+   "pos": [
+    3140,
+    600
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 44,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 66
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 67
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 68
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 69
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      70
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.75
+   ]
+  },
+  {
+   "id": 139,
+   "type": "VAEDecode",
+   "pos": [
+    3140,
+    900
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 45,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 70
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 71
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      72
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 140,
+   "type": "SaveImage",
+   "pos": [
+    3460,
+    600
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 46,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 72
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s4_muscular_d75"
+   ]
+  },
+  {
+   "id": 141,
+   "type": "CLIPTextEncode",
+   "pos": [
+    3850,
+    600
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 47,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 73
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      74,
+      76
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a powerfully muscular heroic build, big arms, very broad shoulders and a deep chest, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "s5_prime denoise 0.75"
+  },
+  {
+   "id": 142,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    3850,
+    940
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 48,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 74
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      77
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 143,
+   "type": "KSampler",
+   "pos": [
+    4290,
+    600
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 49,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 75
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 76
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 77
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 78
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      79
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    0.75
+   ]
+  },
+  {
+   "id": 144,
+   "type": "VAEDecode",
+   "pos": [
+    4290,
+    900
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 50,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 79
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 80
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      81
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 145,
+   "type": "SaveImage",
+   "pos": [
+    4610,
+    600
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 51,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 81
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r3_s5_prime_d75"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   100,
+   0,
+   101,
+   0,
+   "IMAGE"
+  ],
+  [
+   2,
+   101,
+   0,
+   102,
+   0,
+   "IMAGE"
+  ],
+  [
+   3,
+   2,
+   0,
+   104,
+   0,
+   "MODEL"
+  ],
+  [
+   4,
+   103,
+   0,
+   104,
+   1,
+   "MODEL_PATCH"
+  ],
+  [
+   5,
+   4,
+   0,
+   104,
+   2,
+   "VAE"
+  ],
+  [
+   6,
+   101,
+   0,
+   104,
+   3,
+   "IMAGE"
+  ],
+  [
+   7,
+   104,
+   0,
+   5,
+   0,
+   "MODEL"
+  ],
+  [
+   8,
+   100,
+   0,
+   105,
+   0,
+   "IMAGE"
+  ],
+  [
+   9,
+   4,
+   0,
+   105,
+   1,
+   "VAE"
+  ],
+  [
+   10,
+   3,
+   0,
+   106,
+   0,
+   "CLIP"
+  ],
+  [
+   11,
+   106,
+   0,
+   107,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   12,
+   5,
+   0,
+   108,
+   0,
+   "MODEL"
+  ],
+  [
+   13,
+   106,
+   0,
+   108,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   14,
+   107,
+   0,
+   108,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   15,
+   105,
+   0,
+   108,
+   3,
+   "LATENT"
+  ],
+  [
+   16,
+   108,
+   0,
+   109,
+   0,
+   "LATENT"
+  ],
+  [
+   17,
+   4,
+   0,
+   109,
+   1,
+   "VAE"
+  ],
+  [
+   18,
+   109,
+   0,
+   110,
+   0,
+   "IMAGE"
+  ],
+  [
+   19,
+   3,
+   0,
+   111,
+   0,
+   "CLIP"
+  ],
+  [
+   20,
+   111,
+   0,
+   112,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   21,
+   5,
+   0,
+   113,
+   0,
+   "MODEL"
+  ],
+  [
+   22,
+   111,
+   0,
+   113,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   23,
+   112,
+   0,
+   113,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   24,
+   105,
+   0,
+   113,
+   3,
+   "LATENT"
+  ],
+  [
+   25,
+   113,
+   0,
+   114,
+   0,
+   "LATENT"
+  ],
+  [
+   26,
+   4,
+   0,
+   114,
+   1,
+   "VAE"
+  ],
+  [
+   27,
+   114,
+   0,
+   115,
+   0,
+   "IMAGE"
+  ],
+  [
+   28,
+   3,
+   0,
+   116,
+   0,
+   "CLIP"
+  ],
+  [
+   29,
+   116,
+   0,
+   117,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   30,
+   5,
+   0,
+   118,
+   0,
+   "MODEL"
+  ],
+  [
+   31,
+   116,
+   0,
+   118,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   32,
+   117,
+   0,
+   118,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   33,
+   105,
+   0,
+   118,
+   3,
+   "LATENT"
+  ],
+  [
+   34,
+   118,
+   0,
+   119,
+   0,
+   "LATENT"
+  ],
+  [
+   35,
+   4,
+   0,
+   119,
+   1,
+   "VAE"
+  ],
+  [
+   36,
+   119,
+   0,
+   120,
+   0,
+   "IMAGE"
+  ],
+  [
+   37,
+   3,
+   0,
+   121,
+   0,
+   "CLIP"
+  ],
+  [
+   38,
+   121,
+   0,
+   122,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   39,
+   5,
+   0,
+   123,
+   0,
+   "MODEL"
+  ],
+  [
+   40,
+   121,
+   0,
+   123,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   41,
+   122,
+   0,
+   123,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   42,
+   105,
+   0,
+   123,
+   3,
+   "LATENT"
+  ],
+  [
+   43,
+   123,
+   0,
+   124,
+   0,
+   "LATENT"
+  ],
+  [
+   44,
+   4,
+   0,
+   124,
+   1,
+   "VAE"
+  ],
+  [
+   45,
+   124,
+   0,
+   125,
+   0,
+   "IMAGE"
+  ],
+  [
+   46,
+   3,
+   0,
+   126,
+   0,
+   "CLIP"
+  ],
+  [
+   47,
+   126,
+   0,
+   127,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   48,
+   5,
+   0,
+   128,
+   0,
+   "MODEL"
+  ],
+  [
+   49,
+   126,
+   0,
+   128,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   50,
+   127,
+   0,
+   128,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   51,
+   105,
+   0,
+   128,
+   3,
+   "LATENT"
+  ],
+  [
+   52,
+   128,
+   0,
+   129,
+   0,
+   "LATENT"
+  ],
+  [
+   53,
+   4,
+   0,
+   129,
+   1,
+   "VAE"
+  ],
+  [
+   54,
+   129,
+   0,
+   130,
+   0,
+   "IMAGE"
+  ],
+  [
+   55,
+   3,
+   0,
+   131,
+   0,
+   "CLIP"
+  ],
+  [
+   56,
+   131,
+   0,
+   132,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   57,
+   5,
+   0,
+   133,
+   0,
+   "MODEL"
+  ],
+  [
+   58,
+   131,
+   0,
+   133,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   59,
+   132,
+   0,
+   133,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   60,
+   105,
+   0,
+   133,
+   3,
+   "LATENT"
+  ],
+  [
+   61,
+   133,
+   0,
+   134,
+   0,
+   "LATENT"
+  ],
+  [
+   62,
+   4,
+   0,
+   134,
+   1,
+   "VAE"
+  ],
+  [
+   63,
+   134,
+   0,
+   135,
+   0,
+   "IMAGE"
+  ],
+  [
+   64,
+   3,
+   0,
+   136,
+   0,
+   "CLIP"
+  ],
+  [
+   65,
+   136,
+   0,
+   137,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   66,
+   5,
+   0,
+   138,
+   0,
+   "MODEL"
+  ],
+  [
+   67,
+   136,
+   0,
+   138,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   68,
+   137,
+   0,
+   138,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   69,
+   105,
+   0,
+   138,
+   3,
+   "LATENT"
+  ],
+  [
+   70,
+   138,
+   0,
+   139,
+   0,
+   "LATENT"
+  ],
+  [
+   71,
+   4,
+   0,
+   139,
+   1,
+   "VAE"
+  ],
+  [
+   72,
+   139,
+   0,
+   140,
+   0,
+   "IMAGE"
+  ],
+  [
+   73,
+   3,
+   0,
+   141,
+   0,
+   "CLIP"
+  ],
+  [
+   74,
+   141,
+   0,
+   142,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   75,
+   5,
+   0,
+   143,
+   0,
+   "MODEL"
+  ],
+  [
+   76,
+   141,
+   0,
+   143,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   77,
+   142,
+   0,
+   143,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   78,
+   105,
+   0,
+   143,
+   3,
+   "LATENT"
+  ],
+  [
+   79,
+   143,
+   0,
+   144,
+   0,
+   "LATENT"
+  ],
+  [
+   80,
+   4,
+   0,
+   144,
+   1,
+   "VAE"
+  ],
+  [
+   81,
+   144,
+   0,
+   145,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [
+  {
+   "title": "Denoise 0.55",
+   "bounding": [
+    380,
+    -50,
+    4600,
+    580
+   ],
+   "color": "#3f789e",
+   "font_size": 24
+  },
+  {
+   "title": "Denoise 0.75",
+   "bounding": [
+    380,
+    550,
+    4600,
+    580
+   ],
+   "color": "#3f789e",
+   "font_size": 24
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.5,
+   "offset": [
+    500,
+    100
+   ]
+  }
+ },
+ "version": 0.4
+}

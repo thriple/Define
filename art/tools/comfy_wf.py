@@ -10,7 +10,7 @@ END = " Plain flat pale grey background, no scenery, no text, no logos, no water
 
 
 class Workflow:
-    def __init__(self, width=832, height=1216):
+    def __init__(self, width=832, height=1216, link_model=True):
         self.nodes, self.links, self.groups = [], [], []
         self._lid = 0
         self._nid = 100
@@ -19,7 +19,8 @@ class Workflow:
         self.vae = self.node("VAELoader", (0, 270), (320, 58), ["ae.safetensors"], outputs=[("VAE", "VAE")], nid=4)
         self.msaf = self.node("ModelSamplingAuraFlow", (0, 370), (320, 58), [3], inputs=[("model", "MODEL")], outputs=[("MODEL", "MODEL")], nid=5)
         self.latent = self.node("EmptySD3LatentImage", (0, 470), (320, 106), [width, height, 1], outputs=[("LATENT", "LATENT")], nid=6)
-        self.link(self.unet, 0, self.msaf, "model")
+        if link_model:
+            self.link(self.unet, 0, self.msaf, "model")
 
     def node(self, ntype, pos, size, widgets=None, inputs=(), outputs=(), title=None, nid=None):
         if nid is None:
@@ -47,16 +48,16 @@ class Workflow:
     def note(self, text, pos=(-440, 0), size=(400, 420)):
         self.node("Note", pos, size, [text], nid=1)
 
-    def t2i(self, prompt, seed, prefix, pos, title):
+    def t2i(self, prompt, seed, prefix, pos, title, latent=None, denoise=1):
         x, y = pos
         te = self.node("CLIPTextEncode", (x, y), (420, 300), [prompt], inputs=[("clip", "CLIP")], outputs=[("CONDITIONING", "CONDITIONING")], title=title)
         zo = self.node("ConditioningZeroOut", (x, y + 340), (240, 26), inputs=[("conditioning", "CONDITIONING")], outputs=[("CONDITIONING", "CONDITIONING")])
-        ks = self.node("KSampler", (x + 440, y), (300, 262), [seed, "fixed", 8, 1, "res_multistep", "simple", 1],
+        ks = self.node("KSampler", (x + 440, y), (300, 262), [seed, "fixed", 8, 1, "res_multistep", "simple", denoise],
                        inputs=[("model", "MODEL"), ("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent_image", "LATENT")], outputs=[("LATENT", "LATENT")])
         de = self.node("VAEDecode", (x + 440, y + 300), (200, 46), inputs=[("samples", "LATENT"), ("vae", "VAE")], outputs=[("IMAGE", "IMAGE")])
         sv = self.node("SaveImage", (x + 760, y), (340, 500), [prefix], inputs=[("images", "IMAGE")])
         self.link(self.clip, 0, te, "clip"); self.link(te, 0, zo, "conditioning")
-        self.link(self.msaf, 0, ks, "model"); self.link(te, 0, ks, "positive"); self.link(zo, 0, ks, "negative"); self.link(self.latent, 0, ks, "latent_image")
+        self.link(self.msaf, 0, ks, "model"); self.link(te, 0, ks, "positive"); self.link(zo, 0, ks, "negative"); self.link(latent or self.latent, 0, ks, "latent_image")
         self.link(ks, 0, de, "samples"); self.link(self.vae, 0, de, "vae"); self.link(de, 0, sv, "images")
 
     def group(self, title, bounding):

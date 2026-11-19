@@ -1,4 +1,9 @@
-"""Round 2: physique ladder by changing ONLY the build words (same seed and prompt as the chosen D_3d v1_cape)."""
+"""Round 2: physique ladder, two prompt structures side by side (same seed as the chosen D_3d v1_cape).
+
+Row A: round 1 structure, build words near the start of the prompt.
+Row B: build moved to the final sentence. Z-Image's text encoder (Qwen3) is causal: each token's encoding
+depends only on the tokens before it, so with the build last, everything before it encodes identically at
+every stage and only the final sentence differs."""
 import pathlib
 from comfy_wf import Workflow, STYLE_3D, POSE, END
 
@@ -20,21 +25,32 @@ LADDER = [
     ("s4_muscular", "a muscular build, strong defined arms, broad shoulders and a solid chest"),
     ("s5_prime", "a powerfully muscular heroic build, big arms, very broad shoulders and a deep chest"),
 ]
-wf = Workflow()
-wf.note("DEFINE art test, round 2\n\nPress Run once: 5 images.\n\n"
-        "Physique ladder: same seed and prompt as your pick, only the body-build words change. "
-        "s3_athletic is the control and should match round 1 exactly.\n\n"
-        
-        "Paste the results here; seeds are fixed, so screenshots or webp are fine.")
-for i, (tag, build) in enumerate(LADDER):
-    wf.t2i(prompt(build), SEED, f"define/r2_ladder_{tag}", (400 + i * 1150, 0), f"Ladder {tag}")
-wf.group("Physique ladder (only the build words change)", (380, -50, 5750, 560))
-wf.save(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "02_physique_ladder.json")
+def prompt_tail(build):
+    return (STYLE_3D + "\n\nFull-body character design of an original superhero, an adult man "
+            + POSE + COSTUME_V1 + EMBLEM_V1 + END + "\n\nHis physique: " + build + ".")
 
-# sanity: the s3 prompt must equal round 1's D_3d v1_cape prompt
-import json
-r1 = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "01_style_explore.json"))
-r1p = next(n for n in r1["nodes"] if n.get("title") == "Prompt D_3d v1_cape")["widgets_values"][0]
-r1s = next(n for n in r1["nodes"] if n["type"] == "KSampler" and n["widgets_values"][0] == 4001)
-assert prompt("an athletic build") == r1p, "control prompt differs from round 1"
-print("control prompt matches round 1 exactly")
+def main():
+    import json
+    wf = Workflow()
+    wf.note("DEFINE art test, round 2\n\nPress Run once: 10 images.\n\n"
+            "Row A: build words near the start of the prompt (round 1 structure). "
+            "A s3_athletic is the control and should match round 1 exactly.\n\n"
+            "Row B: identical prompt text with the build as the LAST sentence, so everything before it "
+            "encodes identically. Compare drift between rows.\n\n"
+        
+            "Paste the results here; seeds are fixed, so screenshots or webp are fine.")
+    for i, (tag, build) in enumerate(LADDER):
+        wf.t2i(prompt(build), SEED, f"define/r2A_{tag}", (400 + i * 1150, 0), f"A {tag}")
+        wf.t2i(prompt_tail(build), SEED, f"define/r2B_{tag}", (400 + i * 1150, 620), f"B {tag}")
+    wf.group("Row A: build words near the start", (380, -50, 5750, 560))
+    wf.group("Row B: build words last", (380, 570, 5750, 560))
+    wf.save(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "02_physique_ladder.json")
+
+    r1 = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "01_style_explore.json"))
+    r1p = next(n for n in r1["nodes"] if n.get("title") == "Prompt D_3d v1_cape")["widgets_values"][0]
+    assert prompt("an athletic build") == r1p, "control prompt differs from round 1"
+    print("control prompt matches round 1 exactly")
+
+
+if __name__ == "__main__":
+    main()
