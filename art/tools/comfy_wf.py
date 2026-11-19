@@ -60,6 +60,23 @@ class Workflow:
         self.link(self.msaf, 0, ks, "model"); self.link(te, 0, ks, "positive"); self.link(zo, 0, ks, "negative"); self.link(latent or self.latent, 0, ks, "latent_image")
         self.link(ks, 0, de, "samples"); self.link(self.vae, 0, de, "vae"); self.link(de, 0, sv, "images")
 
+    def encode(self, text, pos, title):
+        te = self.node("CLIPTextEncode", pos, (420, 260), [text], inputs=[("clip", "CLIP")], outputs=[("CONDITIONING", "CONDITIONING")], title=title)
+        self.link(self.clip, 0, te, "clip")
+        return te
+
+    def sample(self, cond, seed, prefix, pos, title=None, latent=None, denoise=1):
+        """KSampler -> VAEDecode -> SaveImage from an existing conditioning node (negative = zeroed copy)."""
+        x, y = pos
+        zo = self.node("ConditioningZeroOut", (x, y + 300), (240, 26), inputs=[("conditioning", "CONDITIONING")], outputs=[("CONDITIONING", "CONDITIONING")])
+        ks = self.node("KSampler", (x, y), (300, 262), [seed, "fixed", 8, 1, "res_multistep", "simple", denoise],
+                       inputs=[("model", "MODEL"), ("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent_image", "LATENT")], outputs=[("LATENT", "LATENT")], title=title)
+        de = self.node("VAEDecode", (x, y + 350), (200, 46), inputs=[("samples", "LATENT"), ("vae", "VAE")], outputs=[("IMAGE", "IMAGE")])
+        sv = self.node("SaveImage", (x + 320, y), (300, 460), [prefix], inputs=[("images", "IMAGE")])
+        self.link(cond, 0, zo, "conditioning")
+        self.link(self.msaf, 0, ks, "model"); self.link(cond, 0, ks, "positive"); self.link(zo, 0, ks, "negative"); self.link(latent or self.latent, 0, ks, "latent_image")
+        self.link(ks, 0, de, "samples"); self.link(self.vae, 0, de, "vae"); self.link(de, 0, sv, "images")
+
     def group(self, title, bounding):
         self.groups.append({"title": title, "bounding": list(bounding), "color": "#3f789e", "font_size": 24})
 
