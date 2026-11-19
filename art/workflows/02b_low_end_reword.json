@@ -1,0 +1,1938 @@
+{
+ "last_node_id": 129,
+ "last_link_id": 55,
+ "nodes": [
+  {
+   "id": 2,
+   "type": "UNETLoader",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    320,
+    82
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "z_image_turbo_bf16.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "CLIPLoader",
+   "pos": [
+    0,
+    120
+   ],
+   "size": [
+    320,
+    106
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      2,
+      11,
+      20,
+      29,
+      38,
+      47
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_3_4b.safetensors",
+    "lumina2",
+    "default"
+   ]
+  },
+  {
+   "id": 4,
+   "type": "VAELoader",
+   "pos": [
+    0,
+    270
+   ],
+   "size": [
+    320,
+    58
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      9,
+      18,
+      27,
+      36,
+      45,
+      54
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "ae.safetensors"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    0,
+    370
+   ],
+   "size": [
+    320,
+    58
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      4,
+      13,
+      22,
+      31,
+      40,
+      49
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3
+   ]
+  },
+  {
+   "id": 6,
+   "type": "EmptySD3LatentImage",
+   "pos": [
+    0,
+    470
+   ],
+   "size": [
+    320,
+    106
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      7,
+      16,
+      25,
+      34,
+      43,
+      52
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptySD3LatentImage"
+   },
+   "widgets_values": [
+    832,
+    1216,
+    1
+   ]
+  },
+  {
+   "id": 1,
+   "type": "Note",
+   "pos": [
+    -440,
+    0
+   ],
+   "size": [
+    400,
+    420
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "Note"
+   },
+   "widgets_values": [
+    "DEFINE art test, round 2b (reworded low-end stages)\n\nPress Run once: 6 images.\n\nRow A: build words near the start of the prompt (round 1 structure). A s3_athletic is the control and should match round 1 exactly.\n\nRow B: identical prompt text with the build as the LAST sentence, so everything before it encodes identically.\n\nRow C: same as B, but the physique sentence is in Chinese.\n\nCompare drift (pose, framing, costume, face) and how much the body actually changes.\n\nPaste the results here; seeds are fixed, so screenshots or webp are fine."
+   ]
+  },
+  {
+   "id": 100,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      3,
+      5
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a skinny, out-of-shape build: thin noodle arms, narrow sloping shoulders, a flat chest and a slightly soft belly, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "A s1_untrained"
+  },
+  {
+   "id": 101,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    400,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      6
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 102,
+   "type": "KSampler",
+   "pos": [
+    840,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 4
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 5
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 6
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      8
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 103,
+   "type": "VAEDecode",
+   "pos": [
+    840,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 8
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 9
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      10
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 104,
+   "type": "SaveImage",
+   "pos": [
+    1160,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 10
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2A_s1_untrained"
+   ]
+  },
+  {
+   "id": 105,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    620
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      12,
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark.\n\nHis physique: a skinny, out-of-shape build: thin noodle arms, narrow sloping shoulders, a flat chest and a slightly soft belly."
+   ],
+   "title": "B s1_untrained"
+  },
+  {
+   "id": 106,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    400,
+    960
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 12
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      15
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 107,
+   "type": "KSampler",
+   "pos": [
+    840,
+    620
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 13
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 14
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 15
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 16
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      17
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 108,
+   "type": "VAEDecode",
+   "pos": [
+    840,
+    920
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 17
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 18
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      19
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 109,
+   "type": "SaveImage",
+   "pos": [
+    1160,
+    620
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 19
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2B_s1_untrained"
+   ]
+  },
+  {
+   "id": 110,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    1240
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 20
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      21,
+      23
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark.\n\n\u4ed6\u7684\u4f53\u578b\uff1a\u7626\u5f31\u53c8\u7f3a\u4e4f\u953b\u70bc\uff0c\u624b\u81c2\u7ec6\u5f97\u50cf\u9762\u6761\uff0c\u80a9\u8180\u7a84\u800c\u4e0b\u5782\uff0c\u80f8\u90e8\u6241\u5e73\uff0c\u809a\u5b50\u6709\u70b9\u8f6f\u3002"
+   ],
+   "title": "C s1_untrained"
+  },
+  {
+   "id": 111,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    400,
+    1580
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 21
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      24
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 112,
+   "type": "KSampler",
+   "pos": [
+    840,
+    1240
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 22
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 23
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 24
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 25
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      26
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 113,
+   "type": "VAEDecode",
+   "pos": [
+    840,
+    1540
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 26
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 27
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      28
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 114,
+   "type": "SaveImage",
+   "pos": [
+    1160,
+    1240
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 20,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 28
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2C_s1_untrained"
+   ]
+  },
+  {
+   "id": 115,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1550,
+    0
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 29
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      30,
+      32
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man with a lean build with lightly toned arms and slightly broader shoulders, standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark."
+   ],
+   "title": "A s2_average"
+  },
+  {
+   "id": 116,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1550,
+    340
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 22,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 30
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      33
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 117,
+   "type": "KSampler",
+   "pos": [
+    1990,
+    0
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 23,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 31
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 32
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 33
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 34
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      35
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 118,
+   "type": "VAEDecode",
+   "pos": [
+    1990,
+    300
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 24,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 35
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 36
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      37
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 119,
+   "type": "SaveImage",
+   "pos": [
+    2310,
+    0
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 25,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 37
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2A_s2_average"
+   ]
+  },
+  {
+   "id": 120,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1550,
+    620
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 26,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 38
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      39,
+      41
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark.\n\nHis physique: a lean build with lightly toned arms and slightly broader shoulders."
+   ],
+   "title": "B s2_average"
+  },
+  {
+   "id": 121,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1550,
+    960
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 27,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 39
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      42
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 122,
+   "type": "KSampler",
+   "pos": [
+    1990,
+    620
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 28,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 40
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 41
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 42
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 43
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      44
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 123,
+   "type": "VAEDecode",
+   "pos": [
+    1990,
+    920
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 29,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 44
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 45
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      46
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 124,
+   "type": "SaveImage",
+   "pos": [
+    2310,
+    620
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 30,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 46
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2B_s2_average"
+   ]
+  },
+  {
+   "id": 125,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1550,
+    1240
+   ],
+   "size": [
+    420,
+    300
+   ],
+   "flags": {},
+   "order": 31,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 47
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      48,
+      50
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "Stylized 3D animated feature film character render, soft studio lighting, slightly glossy suit material, appealing stylized proportions, high-end animation studio quality.\n\nFull-body character design of an original superhero, an adult man standing facing the viewer in a confident heroic stance, feet shoulder-width apart, arms relaxed and held slightly away from his body, the whole figure visible from head to toe with empty space around it. He wears a sleek form-fitting suit in hot magenta and deep navy with electric cyan accent lines along the arms and sides, navy gloves and boots, and a short sunset-orange cape that hangs behind his shoulders. A navy domino mask covers his eyes, with glowing cyan eye lenses; short dark hair. On his chest is a bold geometric emblem: a white diagonal dumbbell inside a cyan diamond. Plain flat pale grey background, no scenery, no text, no logos, no watermark.\n\n\u4ed6\u7684\u4f53\u578b\uff1a\u504f\u7626\u4f46\u7565\u6709\u953b\u70bc\uff0c\u624b\u81c2\u6709\u4e00\u70b9\u7ebf\u6761\uff0c\u80a9\u8180\u7a0d\u5fae\u5bbd\u4e00\u4e9b\u3002"
+   ],
+   "title": "C s2_average"
+  },
+  {
+   "id": 126,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1550,
+    1580
+   ],
+   "size": [
+    240,
+    26
+   ],
+   "flags": {},
+   "order": 32,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 48
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      51
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 127,
+   "type": "KSampler",
+   "pos": [
+    1990,
+    1240
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 33,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 49
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 50
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 51
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 52
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      53
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    4001,
+    "fixed",
+    8,
+    1,
+    "res_multistep",
+    "simple",
+    1
+   ]
+  },
+  {
+   "id": 128,
+   "type": "VAEDecode",
+   "pos": [
+    1990,
+    1540
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 34,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 53
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 54
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      55
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 129,
+   "type": "SaveImage",
+   "pos": [
+    2310,
+    1240
+   ],
+   "size": [
+    340,
+    500
+   ],
+   "flags": {},
+   "order": 35,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 55
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "define/r2C_s2_average"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   2,
+   0,
+   5,
+   0,
+   "MODEL"
+  ],
+  [
+   2,
+   3,
+   0,
+   100,
+   0,
+   "CLIP"
+  ],
+  [
+   3,
+   100,
+   0,
+   101,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   4,
+   5,
+   0,
+   102,
+   0,
+   "MODEL"
+  ],
+  [
+   5,
+   100,
+   0,
+   102,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   6,
+   101,
+   0,
+   102,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   7,
+   6,
+   0,
+   102,
+   3,
+   "LATENT"
+  ],
+  [
+   8,
+   102,
+   0,
+   103,
+   0,
+   "LATENT"
+  ],
+  [
+   9,
+   4,
+   0,
+   103,
+   1,
+   "VAE"
+  ],
+  [
+   10,
+   103,
+   0,
+   104,
+   0,
+   "IMAGE"
+  ],
+  [
+   11,
+   3,
+   0,
+   105,
+   0,
+   "CLIP"
+  ],
+  [
+   12,
+   105,
+   0,
+   106,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   13,
+   5,
+   0,
+   107,
+   0,
+   "MODEL"
+  ],
+  [
+   14,
+   105,
+   0,
+   107,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   15,
+   106,
+   0,
+   107,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   16,
+   6,
+   0,
+   107,
+   3,
+   "LATENT"
+  ],
+  [
+   17,
+   107,
+   0,
+   108,
+   0,
+   "LATENT"
+  ],
+  [
+   18,
+   4,
+   0,
+   108,
+   1,
+   "VAE"
+  ],
+  [
+   19,
+   108,
+   0,
+   109,
+   0,
+   "IMAGE"
+  ],
+  [
+   20,
+   3,
+   0,
+   110,
+   0,
+   "CLIP"
+  ],
+  [
+   21,
+   110,
+   0,
+   111,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   22,
+   5,
+   0,
+   112,
+   0,
+   "MODEL"
+  ],
+  [
+   23,
+   110,
+   0,
+   112,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   24,
+   111,
+   0,
+   112,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   25,
+   6,
+   0,
+   112,
+   3,
+   "LATENT"
+  ],
+  [
+   26,
+   112,
+   0,
+   113,
+   0,
+   "LATENT"
+  ],
+  [
+   27,
+   4,
+   0,
+   113,
+   1,
+   "VAE"
+  ],
+  [
+   28,
+   113,
+   0,
+   114,
+   0,
+   "IMAGE"
+  ],
+  [
+   29,
+   3,
+   0,
+   115,
+   0,
+   "CLIP"
+  ],
+  [
+   30,
+   115,
+   0,
+   116,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   31,
+   5,
+   0,
+   117,
+   0,
+   "MODEL"
+  ],
+  [
+   32,
+   115,
+   0,
+   117,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   33,
+   116,
+   0,
+   117,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   34,
+   6,
+   0,
+   117,
+   3,
+   "LATENT"
+  ],
+  [
+   35,
+   117,
+   0,
+   118,
+   0,
+   "LATENT"
+  ],
+  [
+   36,
+   4,
+   0,
+   118,
+   1,
+   "VAE"
+  ],
+  [
+   37,
+   118,
+   0,
+   119,
+   0,
+   "IMAGE"
+  ],
+  [
+   38,
+   3,
+   0,
+   120,
+   0,
+   "CLIP"
+  ],
+  [
+   39,
+   120,
+   0,
+   121,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   40,
+   5,
+   0,
+   122,
+   0,
+   "MODEL"
+  ],
+  [
+   41,
+   120,
+   0,
+   122,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   42,
+   121,
+   0,
+   122,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   43,
+   6,
+   0,
+   122,
+   3,
+   "LATENT"
+  ],
+  [
+   44,
+   122,
+   0,
+   123,
+   0,
+   "LATENT"
+  ],
+  [
+   45,
+   4,
+   0,
+   123,
+   1,
+   "VAE"
+  ],
+  [
+   46,
+   123,
+   0,
+   124,
+   0,
+   "IMAGE"
+  ],
+  [
+   47,
+   3,
+   0,
+   125,
+   0,
+   "CLIP"
+  ],
+  [
+   48,
+   125,
+   0,
+   126,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   49,
+   5,
+   0,
+   127,
+   0,
+   "MODEL"
+  ],
+  [
+   50,
+   125,
+   0,
+   127,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   51,
+   126,
+   0,
+   127,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   52,
+   6,
+   0,
+   127,
+   3,
+   "LATENT"
+  ],
+  [
+   53,
+   127,
+   0,
+   128,
+   0,
+   "LATENT"
+  ],
+  [
+   54,
+   4,
+   0,
+   128,
+   1,
+   "VAE"
+  ],
+  [
+   55,
+   128,
+   0,
+   129,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [
+  {
+   "title": "Row A: build words near the start",
+   "bounding": [
+    380,
+    -50,
+    5750,
+    560
+   ],
+   "color": "#3f789e",
+   "font_size": 24
+  },
+  {
+   "title": "Row B: build words last",
+   "bounding": [
+    380,
+    570,
+    5750,
+    560
+   ],
+   "color": "#3f789e",
+   "font_size": 24
+  },
+  {
+   "title": "Row C: build words last, in Chinese",
+   "bounding": [
+    380,
+    1190,
+    5750,
+    560
+   ],
+   "color": "#3f789e",
+   "font_size": 24
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.5,
+   "offset": [
+    500,
+    100
+   ]
+  }
+ },
+ "version": 0.4
+}

@@ -45,10 +45,10 @@ def prompt_tail_zh(tag):
             + POSE + COSTUME_V1 + EMBLEM_V1 + END + "\n\n" + LADDER_ZH[tag])
 
 
-def main():
+def main(only=None, out="02_physique_ladder.json", label="round 2"):
     import json
     wf = Workflow()
-    wf.note("DEFINE art test, round 2\n\nPress Run once: 15 images.\n\n"
+    wf.note(f"DEFINE art test, {label}\n\nPress Run once: {3 * len(only or LADDER)} images.\n\n"
             "Row A: build words near the start of the prompt (round 1 structure). "
             "A s3_athletic is the control and should match round 1 exactly.\n\n"
             "Row B: identical prompt text with the build as the LAST sentence, so everything before it "
@@ -57,14 +57,14 @@ def main():
             "Compare drift (pose, framing, costume, face) and how much the body actually changes.\n\n"
         
             "Paste the results here; seeds are fixed, so screenshots or webp are fine.")
-    for i, (tag, build) in enumerate(LADDER):
+    for i, (tag, build) in enumerate([l for l in LADDER if not only or l[0] in only]):
         wf.t2i(prompt(build), SEED, f"define/r2A_{tag}", (400 + i * 1150, 0), f"A {tag}")
         wf.t2i(prompt_tail(build), SEED, f"define/r2B_{tag}", (400 + i * 1150, 620), f"B {tag}")
         wf.t2i(prompt_tail_zh(tag), SEED, f"define/r2C_{tag}", (400 + i * 1150, 1240), f"C {tag}")
     wf.group("Row A: build words near the start", (380, -50, 5750, 560))
     wf.group("Row B: build words last", (380, 570, 5750, 560))
     wf.group("Row C: build words last, in Chinese", (380, 1190, 5750, 560))
-    wf.save(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "02_physique_ladder.json")
+    wf.save(pathlib.Path(__file__).resolve().parents[1] / "workflows" / out)
 
     r1 = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "workflows" / "01_style_explore.json"))
     r1p = next(n for n in r1["nodes"] if n.get("title") == "Prompt D_3d v1_cape")["widgets_values"][0]
@@ -74,3 +74,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    main(only={"s1_untrained", "s2_average"}, out="02b_low_end_reword.json", label="round 2b (reworded low-end stages)")
