@@ -91,6 +91,7 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
             modifier = Modifier.weight(1f).fillMaxWidth(),
             aura = if (done) Palette.Lime else Palette.Cyan,
             energy = ((momentum - 1.0) / 2.0).toFloat().coerceIn(0.15f, 1f),
+            pump = if (done) 0.5f else 0f,   // post-workout pump for the rest of the day
         )
         Text("STAGE ${state.shownStage} / ${Logic.STAGES}", style = Type.Label.copy(color = Palette.Gold))
         Spacer(Modifier.height(10.dp))

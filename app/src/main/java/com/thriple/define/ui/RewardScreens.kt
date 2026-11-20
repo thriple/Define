@@ -328,6 +328,8 @@ fun TransformScreen(from: Int, to: Int, onDone: () -> Unit) {
                 },
                 aura = if (revealed) Palette.Gold else Palette.Cyan,
                 energy = if (revealed) 1f else charge.value,
+                pump = if (revealed) 1f else charge.value * 0.8f,
+                glow = 1f + 2f * charge.value,
             )
         }
         AnimatedVisibility(showButton, enter = scaleIn(spring(dampingRatio = 0.5f)) + fadeIn()) {
