@@ -263,3 +263,35 @@ Pass 0 and pass 1 can run side by side: the app code doesn't wait on the art.
 5. **Phone:** roughly what model/Android version? (Decides how much of the shader work you'll see.)
 6. **ComfyUI:** which GPU, and which models are installed (any image-edit model such as Flux Kontext
    or Qwen-Image-Edit, and ControlNet)? What port does Pinokio show for ComfyUI?
+
+---
+
+## 10. Status (2026-11-20)
+
+**Shipped (builds 1–4, Releases `build-N`):**
+- Engine (pure Kotlin, `engine/`, unit-tested on the JVM in a scratch Gradle project): rotation, ladders,
+  soreness-gated step-ups, deloads, welcome-back, streak + shields, momentum, pods with pity, ranks
+  (thresholds 0/1500/5000/12000/24000/42000), 8 hero stages unlocked as transformation events.
+- UI: HQ, body check, workout player, effort, supply pod, transformation, settings, reminders.
+- Hero body rig (`ui/HeroRig.kt`, `ui/Hero.kt`): landmarks per stage from the silhouettes
+  (`art/tools/rig_*.py`), displacement-field AGSL shader (Android 13+) with drawBitmapMesh fallback:
+  chest-driven breathing, sway over planted feet, cape flutter, glow; post-workout pump.
+- Coaching (`engine/Coaching.kt`, `engine/Pictogram.kt`, `ui/PictogramView.kt`): plain-language primer,
+  per-exercise intro cards with animated stick-figure diagrams (IK), "How to do it".
+- Workout input: one tap per round (hands are busy with weights); PACE ME = 3-2-1 countdown + per-phase
+  cue words and tones at each exercise's tempo, synced figure, reps-left countdown.
+
+**User feedback so far:** whole-body breathing looked wrong (fixed with the rig); workout terms too
+vague (plain language + diagrams); tapping per rep impractical with weights (one tap / PACE ME).
+
+**Open questions:** pair vs single 30 lb dumbbell, heavier weights owned (only 30 lb caps the hero at
+stage 6 of 8), joint issues, weekend windows, phone model/Android version.
+
+**Next candidates:** hero on the workout screen flexing per round; Suit Locker (gear recolours the hero
+via rig masks); Oath / Distress signal / Dawn Patrol / missions board / comic issue; history calendar;
+intensity setting; widget.
+
+**Side project:** SeedVR2 Upscaler (PowerShell WinForms app, not in this repo) driving
+`S:\pinokio\api\comfy.git\app\custom_nodes\seedvr2_videoupscaler\inference_cli.py` with ComfyUI's
+`app\env\Scripts\python.exe`, models in `app\models\SEEDVR2`, ffmpeg from `S:\pinokio\bin\ffmpeg-env`.
+Quality was poor at batch 5 / 3B Q8; added input noise, tile size and preview mode for A/B tests.
