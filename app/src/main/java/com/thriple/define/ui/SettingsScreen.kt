@@ -85,7 +85,7 @@ fun SettingsScreen(
                 val unit = if (ex.measure == Measure.SECONDS) "s" else ""
                 Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
                     Text(ex.name, style = Type.Body, modifier = Modifier.weight(1f))
-                    Text("${step.sets} × ${step.reps}$unit$load", style = Type.Sub.copy(fontSize = 14.sp, color = Palette.Cyan))
+                    Text("${step.sets} rounds of ${step.reps}$unit$load", style = Type.Sub.copy(fontSize = 14.sp, color = Palette.Cyan))
                 }
             }
             Spacer(Modifier.height(6.dp))

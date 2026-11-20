@@ -31,6 +31,7 @@ data class AppState(
     val weights: Set<Int> = setOf(30),
     val soundOn: Boolean = true,
     val remindersOn: Boolean = true,
+    val seenPrimer: Boolean = false,
 ) {
     fun stepIndex(id: String): Int = steps[id] ?: 0
     fun doneOn(day: Long): Boolean = lastSessionDay == day

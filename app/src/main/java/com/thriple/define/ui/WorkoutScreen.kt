@@ -28,12 +28,16 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +61,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thriple.define.engine.Coaching
 import com.thriple.define.engine.Measure
 import com.thriple.define.engine.PlannedExercise
 import com.thriple.define.engine.Rarity
@@ -68,6 +73,7 @@ import kotlinx.coroutines.launch
 private const val REST_SECONDS = 60
 
 private enum class Phase { WORK, REST }
+private enum class View { PRIMER, INTRO, WORK, REST }
 
 /** One "slot" = one set (per side for one-sided moves). */
 private data class Slot(val item: PlannedExercise, val set: Int, val sets: Int, val side: String?)
@@ -80,6 +86,8 @@ private fun slotsFor(plan: SessionPlan): List<Slot> = plan.items.flatMap { item 
 @Composable
 fun WorkoutScreen(
     plan: SessionPlan,
+    primerSeen: Boolean,
+    onPrimerSeen: () -> Unit,
     onSurge: () -> SurgeResult,
     onFinish: (completed: Map<String, Boolean>, reps: Int) -> Unit,
 ) {
@@ -91,6 +99,14 @@ fun WorkoutScreen(
     val completed = remember { mutableStateMapOf<String, Boolean>().apply { plan.items.forEach { put(it.exercise.id, true) } } }
     val slot = slots[index]
     val isLast = index == slots.lastIndex
+    var primerDone by remember { mutableStateOf(primerSeen) }
+    val introduced = remember { mutableStateListOf<String>() }
+    val view = when {
+        !primerDone -> View.PRIMER
+        phase == Phase.REST -> View.REST
+        slot.item.exercise.id !in introduced -> View.INTRO
+        else -> View.WORK
+    }
 
     fun advance() {
         if (isLast) {
@@ -110,16 +126,20 @@ fun WorkoutScreen(
         SessionProgress(index, slots.size, plan.type.title)
         Spacer(Modifier.height(14.dp))
         AnimatedContent(
-            targetState = index to phase,
+            targetState = index to view,
             transitionSpec = {
                 (slideInHorizontally(spring(dampingRatio = 0.75f, stiffness = 300f)) { it } + fadeIn()) togetherWith
                     (slideOutHorizontally(tween(260)) { -it } + fadeOut(tween(200)))
             },
             modifier = Modifier.weight(1f),
             label = "slot",
-        ) { (i, ph) ->
+        ) { (i, v) ->
             val s = slots[i]
-            if (ph == Phase.REST) {
+            if (v == View.PRIMER) {
+                PrimerPanel { primerDone = true; onPrimerSeen() }
+            } else if (v == View.INTRO) {
+                IntroPanel(s) { introduced.add(s.item.exercise.id) }
+            } else if (v == View.REST) {
                 RestPanel(next = s, onDone = { phase = Phase.WORK; Sfx.play("pop") })
             } else {
                 WorkPanel(
@@ -130,6 +150,7 @@ fun WorkoutScreen(
                         celebrateSet(fx, at, surge)
                         advance()
                     },
+                    onHowTo = { introduced.remove(s.item.exercise.id) },
                     onGiveUp = {
                         completed[s.item.exercise.id] = false
                         Sfx.play("fail"); Haptics.thud()
@@ -166,7 +187,7 @@ private fun SessionProgress(done: Int, total: Int, title: String) {
     Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(title, style = Type.Sub.copy(color = Palette.Cyan), modifier = Modifier.weight(1f))
-            Text("SET ${done + 1} / $total", style = Type.Label)
+            Text("$done / $total DONE", style = Type.Label)
         }
         Spacer(Modifier.height(6.dp))
         Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Color.White.copy(alpha = 0.12f))) {
@@ -180,21 +201,31 @@ private fun SessionProgress(done: Int, total: Int, title: String) {
 
 private fun targetLabel(s: Slot): String {
     val step = s.item.step
-    val amount = if (s.item.exercise.measure == Measure.SECONDS) "${step.reps} SEC" else "${step.reps} REPS"
+    val amount = if (s.item.exercise.measure == Measure.SECONDS) "HOLD ${step.reps} SEC" else "DO IT ${step.reps} TIMES"
     val weight = if (step.weightLb > 0) " · ${step.weightLb} LB" else ""
-    val side = s.side?.let { " · $it" } ?: ""
-    return "SET ${s.set} OF ${s.sets} · $amount$weight$side"
+    val side = s.side?.let { " · ${it} SIDE" } ?: ""
+    val round = if (s.sets > 1) "ROUND ${s.set} OF ${s.sets} · " else ""
+    return "$round$amount$weight$side"
 }
 
 @Composable
-private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit, onGiveUp: () -> Unit) {
+private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit, onHowTo: () -> Unit, onGiveUp: () -> Unit) {
     val ex = slot.item.exercise
+    val guide = Coaching.guide(ex.id)
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(ex.name.uppercase(), style = Type.Big.copy(fontSize = 30.sp), textAlign = TextAlign.Center)
+        Text(ex.name.uppercase(), style = Type.Big.copy(fontSize = 28.sp), textAlign = TextAlign.Center)
         Spacer(Modifier.height(4.dp))
         Text(targetLabel(slot), style = Type.Sub.copy(color = Palette.Gold, fontSize = 15.sp), textAlign = TextAlign.Center)
-        Spacer(Modifier.height(6.dp))
-        Text(ex.cue, style = Type.Body, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PictogramView(ex.id, Modifier.size(96.dp))
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(guide.oneTime, style = Type.Body.copy(fontSize = 14.sp, lineHeight = 19.sp))
+                Spacer(Modifier.height(6.dp))
+                Text("HOW TO DO IT ›", style = Type.Label.copy(color = Palette.Cyan), modifier = Modifier.clip(RoundedCornerShape(10.dp)).bouncy(onHowTo).padding(vertical = 4.dp))
+            }
+        }
         Spacer(Modifier.weight(1f))
         if (ex.measure == Measure.SECONDS) {
             TimedTarget(slot.item.step.reps, onSetDone)
@@ -203,7 +234,7 @@ private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit
         }
         Spacer(Modifier.weight(1f))
         Text(
-            if (ex.measure == Measure.SECONDS) "SKIP" else "CAN'T FINISH THIS SET",
+            if (ex.measure == Measure.SECONDS) "SKIP" else "CAN'T FINISH THIS ROUND",
             style = Type.Label.copy(color = Palette.Dim),
             modifier = Modifier.clip(RoundedCornerShape(14.dp)).bouncy(onGiveUp).padding(14.dp),
         )
@@ -273,7 +304,7 @@ private fun RepTarget(target: Int, onRep: () -> Unit, onDone: (Offset) -> Unit) 
                 transitionSpec = { (scaleIn(spring(dampingRatio = 0.4f), initialScale = 1.8f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.6f) + fadeOut()) },
                 label = "reps",
             ) { r -> Text("$r", style = Type.Huge.copy(fontSize = 96.sp)) }
-            Text(if (reps == 0) "TAP EACH REP" else "OF $target", style = Type.Label)
+            Text(if (reps == 0) "TAP AFTER EACH ONE" else "OF $target", style = Type.Label)
         }
     }
 }
@@ -347,5 +378,49 @@ private fun RestPanel(next: Slot, onDone: () -> Unit) {
         Text(targetLabel(next), style = Type.Sub.copy(color = Palette.Gold, fontSize = 14.sp), textAlign = TextAlign.Center)
         Spacer(Modifier.height(26.dp))
         HypeButton("I'M READY", colors = listOf(Palette.Violet, Palette.Magenta), pulse = false, onClick = onDone)
+    }
+}
+
+@Composable
+private fun PrimerPanel(onDone: () -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(Coaching.primerTitle, style = Type.Title.copy(color = Palette.Cyan), textAlign = TextAlign.Center)
+        Spacer(Modifier.height(14.dp))
+        Coaching.primer.forEachIndexed { i, line ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                Text("${i + 1}", style = Type.Sub.copy(color = Palette.Gold), modifier = Modifier.width(26.dp))
+                Text(line, style = Type.Body.copy(color = Palette.White))
+            }
+        }
+        Spacer(Modifier.height(18.dp))
+        HypeButton("GOT IT", Modifier.fillMaxWidth(), colors = listOf(Palette.Cyan, Palette.Violet), onClick = onDone)
+    }
+}
+
+/** Shown before the first round of each exercise (and from "How to do it"). */
+@Composable
+private fun IntroPanel(slot: Slot, onGo: () -> Unit) {
+    val ex = slot.item.exercise
+    val g = Coaching.guide(ex.id)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("NEXT UP", style = Type.Label)
+        Text(ex.name.uppercase(), style = Type.Big.copy(fontSize = 28.sp), textAlign = TextAlign.Center)
+        PictogramView(ex.id, Modifier.size(190.dp))
+        Text(targetLabel(slot), style = Type.Sub.copy(color = Palette.Gold, fontSize = 15.sp), textAlign = TextAlign.Center)
+        Spacer(Modifier.height(10.dp))
+        Text(g.oneTime, style = Type.Sub.copy(fontSize = 15.sp, color = Palette.White), textAlign = TextAlign.Center)
+        Spacer(Modifier.height(12.dp))
+        g.steps.forEachIndexed { i, step ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Text("${i + 1}", style = Type.Sub.copy(color = Palette.Cyan), modifier = Modifier.width(24.dp))
+                Text(step, style = Type.Body.copy(color = Palette.White))
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text("PACE: " + g.pace, style = Type.Body.copy(color = Palette.Lime), modifier = Modifier.fillMaxWidth())
+        if (g.avoid.isNotEmpty()) Text("AVOID: " + g.avoid, style = Type.Body.copy(color = Palette.Orange), modifier = Modifier.fillMaxWidth())
+        g.easier?.let { Text(it, style = Type.Body, modifier = Modifier.fillMaxWidth()) }
+        Spacer(Modifier.height(16.dp))
+        HypeButton("LET'S GO", Modifier.fillMaxWidth(), colors = listOf(Palette.Magenta, Palette.Orange), onClick = onGo)
     }
 }

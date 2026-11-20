@@ -150,6 +150,8 @@ private fun DefineApp(activity: MainActivity) {
                     }
                     is Screen.Workout -> WorkoutScreen(
                         plan = s.plan,
+                        primerSeen = state.seenPrimer,
+                        onPrimerSeen = { save(state.copy(seenPrimer = true)) },
                         onSurge = {
                             val (ns, surge) = Logic.rollSurge(state, rng)
                             save(ns)
