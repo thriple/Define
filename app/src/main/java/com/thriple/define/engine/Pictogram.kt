@@ -117,6 +117,24 @@ object Pictogram {
     private fun rad(d: Float) = d * PI.toFloat() / 180f
     private fun bell(f: Frame, at: P) { f.dot(at, 0.032f, Ink.WEIGHT) }
 
+    /**
+     * The rhythm of one repetition: (cue word, seconds). Same timing as the diagram's loop, so the figure,
+     * the beat and the on-screen cue stay in sync. Empty word = a quiet pause.
+     */
+    fun phases(id: String): List<Pair<String, Float>> = when (id) {
+        "curls" -> listOf("UP" to 1.0f, "HOLD" to 0.25f, "DOWN" to 2.0f, "" to 0.35f)
+        "press" -> listOf("PRESS" to 1.0f, "HOLD" to 0.25f, "LOWER" to 1.8f, "" to 0.35f)
+        "triceps" -> listOf("LOWER" to 1.8f, "" to 0.2f, "UP" to 1.0f, "" to 0.4f)
+        "pushups" -> listOf("DOWN" to 1.6f, "" to 0.2f, "UP" to 1.0f, "" to 0.4f)
+        "row" -> listOf("PULL" to 1.0f, "SQUEEZE" to 0.3f, "LOWER" to 1.6f, "" to 0.4f)
+        "ytw" -> listOf("Y" to 0.9f, "" to 0.5f, "T" to 0.9f, "" to 0.5f, "W" to 0.9f, "" to 0.5f)
+        "wallslides" -> listOf("UP" to 1.6f, "" to 0.2f, "DOWN" to 1.6f, "" to 0.2f)
+        else -> listOf("GO" to 1.5f, "" to 1.5f)
+    }
+
+    /** Seconds per repetition at the demonstrated pace. */
+    fun period(id: String): Float = phases(id).sumOf { it.second.toDouble() }.toFloat()
+
     fun frame(id: String, t: Float): Frame {
         val f = Frame()
         floor(f)

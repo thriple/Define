@@ -230,7 +230,7 @@ private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit
         if (ex.measure == Measure.SECONDS) {
             TimedTarget(slot.item.step.reps, onSetDone)
         } else {
-            RepTarget(slot.item.step.reps, onRep, onSetDone)
+            RepTarget(ex.id, slot.item.step.reps, onRep, onSetDone)
         }
         Spacer(Modifier.weight(1f))
         Text(
@@ -241,70 +241,127 @@ private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit
     }
 }
 
-/** Tap once per rep. Every tap pops, bursts and climbs in pitch; the ring fills toward the target. */
+/**
+ * One tap when the round is done (hands are busy holding weights). Or PACE ME: a 3-2-1 countdown, then a
+ * rhythm at the exercise's tempo: cue word + tone for each part of the movement (high = lift, low = lower),
+ * the stick figure moving in sync inside the ring, and a countdown of how many are left. Completes by itself.
+ */
 @Composable
-private fun RepTarget(target: Int, onRep: () -> Unit, onDone: (Offset) -> Unit) {
+private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone: (Offset) -> Unit) {
     val fx = LocalFx.current
     val scope = rememberCoroutineScope()
     var reps by remember { mutableIntStateOf(0) }
-    var origin by remember { mutableStateOf(Offset.Zero) }
+    var pacing by remember { mutableStateOf(false) }
+    var countdown by remember { mutableIntStateOf(0) }
+    var cue by remember { mutableStateOf("") }
+    var finished by remember { mutableStateOf(false) }
     var center by remember { mutableStateOf(Offset.Zero) }
     val punch = remember { Animatable(1f) }
     val fill by animateFloatAsState(reps.toFloat() / target, spring(dampingRatio = 0.55f, stiffness = 260f), label = "fill")
     val time by rememberFrameTime()
     val repCallback by rememberUpdatedState(onRep)
     val doneCallback by rememberUpdatedState(onDone)
+    val lifts = setOf("UP", "PRESS", "PULL", "Y", "T", "W", "GO")
+    val lowers = setOf("DOWN", "LOWER")
 
-    Box(
-        Modifier.size(280.dp)
-            .onGloballyPositioned { origin = it.positionInRoot(); center = origin + Offset(it.size.width / 2f, it.size.height / 2f) }
-            .graphicsLayer { scaleX = punch.value; scaleY = punch.value }
-            .pointerInput(target) {
-                detectTapGestures { pos ->
-                    if (reps >= target) return@detectTapGestures
-                    reps += 1
-                    repCallback()
-                    val at = origin + pos
-                    Sfx.play("tick", 0.75f + 0.09f * reps)
-                    Haptics.tick()
-                    fx.burst(at, listOf(Palette.Cyan, Palette.Magenta, Palette.Lime), count = 14, speed = 650f)
-                    fx.ring(center, Palette.Cyan.copy(alpha = 0.7f), 420f, 10f)
-                    scope.launch { punch.snapTo(0.9f); punch.animateTo(1f, spring(dampingRatio = 0.3f, stiffness = 600f)) }
-                    if (reps >= target) {
-                        scope.launch { delay(180); doneCallback(center) }
+    fun pop(i: Int) {
+        Sfx.play("pop", 0.9f + 0.06f * i)
+        Haptics.click()
+        fx.burst(center, listOf(Palette.Cyan, Palette.Magenta, Palette.Lime), count = 16, speed = 700f)
+        fx.ring(center, Palette.Cyan.copy(alpha = 0.7f), 420f, 10f)
+        scope.launch { punch.snapTo(0.92f); punch.animateTo(1f, spring(dampingRatio = 0.3f, stiffness = 600f)) }
+    }
+
+    fun finish() {
+        if (finished) return
+        finished = true
+        pacing = false
+        while (reps < target) { reps += 1; repCallback() }
+        scope.launch { delay(200); doneCallback(center) }
+    }
+
+    LaunchedEffect(pacing) {
+        if (!pacing) return@LaunchedEffect
+        for (n in 3 downTo 1) {
+            countdown = n
+            Sfx.play("tick", 1.0f); Haptics.tick()
+            delay(800)
+        }
+        countdown = 0
+        val phases = com.thriple.define.engine.Pictogram.phases(exerciseId)
+        while (pacing && reps < target && !finished) {
+            for ((word, secs) in phases) {
+                cue = word
+                when (word) {
+                    in lifts -> { Sfx.play("tick", 1.6f); Haptics.tick() }
+                    in lowers -> { Sfx.play("tick", 0.8f); Haptics.tick() }
+                    "" -> Unit
+                    else -> Sfx.play("tick", 1.25f, 0.45f)
+                }
+                delay((secs * 1000).toLong())
+                if (!pacing || finished) break
+            }
+            if (!pacing || finished) break
+            reps += 1
+            repCallback()
+            pop(reps)
+        }
+        if (reps >= target) finish()
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier.size(270.dp)
+                .onGloballyPositioned { center = it.positionInRoot() + Offset(it.size.width / 2f, it.size.height / 2f) }
+                .graphicsLayer { scaleX = punch.value; scaleY = punch.value }
+                .pointerInput(Unit) { detectTapGestures { if (!finished) { pop(target); finish() } } },
+            contentAlignment = Alignment.Center,
+        ) {
+            Canvas(Modifier.fillMaxSize()) {
+                val t = time
+                val stroke = 22.dp.toPx()
+                val inset = stroke / 2 + 6.dp.toPx()
+                val arcSize = Size(size.width - inset * 2, size.height - inset * 2)
+                drawCircle(Brush.radialGradient(listOf(Palette.Magenta.copy(alpha = 0.35f), Color.Transparent)), radius = size.minDimension / 2)
+                drawArc(Color.White.copy(alpha = 0.12f), 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke))
+                rotate(-90f) {
+                    drawArc(
+                        Brush.sweepGradient(listOf(Palette.Cyan, Palette.Lime, Palette.Gold, Palette.Magenta, Palette.Cyan)),
+                        0f, 360f * fill.coerceIn(0f, 1f), false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round),
+                    )
+                }
+                rotate(t * 40f) {
+                    for (k in 0 until 24) {
+                        rotate(k * 15f) {
+                            drawCircle(Palette.Cyan.copy(alpha = 0.25f + 0.25f * kotlin.math.sin(t * 3f + k)), 3.dp.toPx(), Offset(size.width / 2f, 3.dp.toPx()))
+                        }
                     }
                 }
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(Modifier.fillMaxSize()) {
-            val t = time
-            val stroke = 22.dp.toPx()
-            val inset = stroke / 2 + 6.dp.toPx()
-            val arcSize = Size(size.width - inset * 2, size.height - inset * 2)
-            drawCircle(Brush.radialGradient(listOf(Palette.Magenta.copy(alpha = 0.35f), Color.Transparent)), radius = size.minDimension / 2)
-            drawArc(Color.White.copy(alpha = 0.12f), 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke))
-            rotate(-90f) {
-                drawArc(
-                    Brush.sweepGradient(listOf(Palette.Cyan, Palette.Lime, Palette.Gold, Palette.Magenta, Palette.Cyan)),
-                    0f, 360f * fill.coerceIn(0f, 1f), false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round),
-                )
             }
-            rotate(t * 40f) {
-                for (k in 0 until 24) {
-                    rotate(k * 15f) {
-                        drawCircle(Palette.Cyan.copy(alpha = 0.25f + 0.25f * kotlin.math.sin(t * 3f + k)), 3.dp.toPx(), Offset(size.width / 2f, 3.dp.toPx()))
-                    }
+            when {
+                pacing && countdown > 0 -> AnimatedContent(
+                    targetState = countdown,
+                    transitionSpec = { (scaleIn(spring(dampingRatio = 0.4f), initialScale = 2f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.5f) + fadeOut()) },
+                    label = "countdown",
+                ) { n -> Text("$n", style = Type.Huge.copy(fontSize = 110.sp, color = Palette.Gold)) }
+                pacing -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    PictogramView(exerciseId, Modifier.size(120.dp))
+                    Text(cue.ifEmpty { " " }, style = Type.Title.copy(color = if (cue in lowers) Palette.Violet else Palette.Lime))
+                    Text("${target - reps} LEFT", style = Type.Label)
+                }
+                else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$target", style = Type.Huge.copy(fontSize = 96.sp))
+                    Text("TAP WHEN THE\nROUND IS DONE", style = Type.Label, textAlign = TextAlign.Center)
                 }
             }
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            AnimatedContent(
-                targetState = reps,
-                transitionSpec = { (scaleIn(spring(dampingRatio = 0.4f), initialScale = 1.8f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.6f) + fadeOut()) },
-                label = "reps",
-            ) { r -> Text("$r", style = Type.Huge.copy(fontSize = 96.sp)) }
-            Text(if (reps == 0) "TAP AFTER EACH ONE" else "OF $target", style = Type.Label)
+        Spacer(Modifier.height(8.dp))
+        if (!pacing && !finished) {
+            Text(
+                "PACE ME: COUNTDOWN + RHYTHM",
+                style = Type.Label.copy(color = Palette.Lime),
+                modifier = Modifier.clip(RoundedCornerShape(14.dp)).bouncy { Sfx.play("pop"); pacing = true }.padding(10.dp),
+            )
         }
     }
 }
