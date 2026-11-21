@@ -65,33 +65,6 @@ fun rememberFrameTime(): State<Float> = produceState(0f) {
     }
 }
 
-/** Slow-moving glowing colour blobs plus drifting sparkles. The app's ever-present motion layer. */
-@Composable
-fun LivingBackground(colors: List<Color>, modifier: Modifier = Modifier, intensity: Float = 1f) {
-    val time by rememberFrameTime()
-    val sparkles = remember { List(46) { Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()) } }
-    Canvas(modifier.fillMaxSize()) {
-        val t = time
-        drawRect(Brush.verticalGradient(listOf(Palette.InkDeep, Palette.Ink, Palette.InkDeep)))
-        colors.forEachIndexed { i, c ->
-            val sp = 0.05f + i * 0.017f
-            val cx = size.width * (0.5f + 0.42f * sin(t * sp * 2f + i * 1.7f))
-            val cy = size.height * (0.5f + 0.40f * cos(t * sp * 1.3f + i * 2.3f))
-            val r = size.minDimension * (0.55f + 0.12f * sin(t * 0.3f + i))
-            drawCircle(
-                Brush.radialGradient(listOf(c.copy(alpha = 0.42f * intensity), Color.Transparent), Offset(cx, cy), r),
-                radius = r, center = Offset(cx, cy),
-            )
-        }
-        sparkles.forEach { (x, y, s) ->
-            val py = ((y - t * (0.012f + s * 0.03f)) % 1f + 1f) % 1f
-            val px = x + 0.02f * sin(t * (0.5f + s) + y * 10f)
-            val a = (0.25f + 0.55f * (0.5f + 0.5f * sin(t * (1.5f + 3f * s) + x * 20f))) * intensity
-            drawCircle(Color.White.copy(alpha = a), radius = 1.2f + 2.4f * s, center = Offset(px * size.width, py * size.height))
-        }
-    }
-}
-
 // ---------------------------------------------------------------- full-screen effects layer
 
 sealed class Effect(val start: Float, val duration: Float)

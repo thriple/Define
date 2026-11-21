@@ -120,4 +120,6 @@ object Music {
     fun boom() = cue { it.boom() }
     fun fail() = cue { it.fail() }
     fun riser(seconds: Float) = cue { it.riser(seconds) }
+    fun hit(power: Float) = cue { it.hit(power) }
+    fun tap() = cue { it.tap() }
 }

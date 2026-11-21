@@ -52,6 +52,8 @@ import com.thriple.define.ui.Haptics
 import com.thriple.define.ui.HomeScreen
 import com.thriple.define.ui.LivingBackground
 import com.thriple.define.ui.LocalFx
+import com.thriple.define.ui.LocalTilt
+import com.thriple.define.ui.rememberTilt
 import com.thriple.define.ui.Music
 import com.thriple.define.ui.Palette
 import com.thriple.define.ui.PodScreen
@@ -147,12 +149,13 @@ private fun DefineApp(activity: MainActivity) {
     }
 
     val time by rememberFrameTime()
-    CompositionLocalProvider(LocalFx provides fx) {
+    val tilt = rememberTilt()
+    CompositionLocalProvider(LocalFx provides fx, LocalTilt provides tilt) {
         Box(Modifier.fillMaxSize().graphicsLayer {
             val o = fx.shakeOffset(time)
             translationX = o.x; translationY = o.y
         }) {
-            LivingBackground(Palette.forHour(LocalTime.now().hour))
+            LivingBackground(Palette.forHour(LocalTime.now().hour), meteorsPerMinute = 3f + state.streak * 0.4f)
             AnimatedContent(
                 targetState = screen,
                 transitionSpec = {

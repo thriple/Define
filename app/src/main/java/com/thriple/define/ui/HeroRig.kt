@@ -45,8 +45,8 @@ private fun sstep(e0: Float, e1: Float, x: Float): Float {
 
 /** Writes (dx, dy) for point (x, y) into out[0], out[1]. Mirrors disp() in the shader. */
 fun rigDisplacement(r: Rig, x: Float, y: Float, breath: Float, sway: Float, pump: Float, out: FloatArray) {
-    val a = 0.0065f * r.h * (breath + 0.6f * pump)
-    val b = 0.016f * breath + 0.05f * pump
+    val a = 0.0095f * r.h * (breath + 0.6f * pump)
+    val b = 0.024f * breath + 0.05f * pump
     val chestY = r.shoulder + 0.55f * (r.armpit - r.shoulder)
     val armBlend = sstep(r.torsoHalf - 6f, r.torsoHalf + 12f, abs(x - r.cx))
     val armFade = 1f - sstep(r.hand, r.hand + 0.05f * r.h, y)
@@ -60,11 +60,14 @@ fun rigDisplacement(r: Rig, x: Float, y: Float, breath: Float, sway: Float, pump
     out[1] = -a * lift
 }
 
-/** Cape flutter offset for a point with cape weight [cape] (0..1). Mirrors the shader. */
-fun capeFlutter(r: Rig, x: Float, y: Float, cape: Float, time: Float, out: FloatArray) {
+/**
+ * Cape flutter offset for a point with cape weight [cape] (0..1). [phase] is the cape's own clock (it runs
+ * faster in a gust), [wind] the strength. Two travelling waves so it ripples instead of swinging. Mirrors the shader.
+ */
+fun capeFlutter(r: Rig, x: Float, y: Float, cape: Float, phase: Float, wind: Float, out: FloatArray) {
     val hem = sstep(r.hand, r.feet, y)
-    out[0] = cape * hem * 0.012f * r.h * sin(y * 0.035f - time * 2.6f)
-    out[1] = cape * hem * 0.004f * r.h * sin(x * 0.05f - time * 1.9f)
+    out[0] = cape * hem * r.h * wind * (0.014f * sin(y * 0.035f - phase * 2.6f) + 0.005f * sin(y * 0.09f - phase * 4.3f))
+    out[1] = cape * hem * r.h * wind * 0.005f * sin(x * 0.05f - phase * 1.9f)
 }
 
 const val HERO_SHADER = """
@@ -83,6 +86,8 @@ uniform float sway;
 uniform float pump;
 uniform float time;
 uniform float glow;
+uniform float wind;
+uniform float cphase;
 
 float sstep(float e0, float e1, float x) {
     float t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
@@ -90,8 +95,8 @@ float sstep(float e0, float e1, float x) {
 }
 
 float2 disp(float2 p) {
-    float A = 0.0065 * H * (breath + 0.6 * pump);
-    float B = 0.016 * breath + 0.05 * pump;
+    float A = 0.0095 * H * (breath + 0.6 * pump);
+    float B = 0.024 * breath + 0.05 * pump;
     float chestY = sh + 0.55 * (armpit - sh);
     float armBlend = sstep(th - 6.0, th + 12.0, abs(p.x - cx));
     float armFade = 1.0 - sstep(hand, hand + 0.05 * H, p.y);
@@ -108,8 +113,8 @@ half4 main(float2 p) {
     float2 src = p - disp(p);
     float cape = float(rigmap.eval(src).r);
     float hem = sstep(hand, feet, p.y);
-    src.x -= cape * hem * 0.012 * H * sin(p.y * 0.035 - time * 2.6);
-    src.y -= cape * hem * 0.004 * H * sin(p.x * 0.05 - time * 1.9);
+    src.x -= cape * hem * H * wind * (0.014 * sin(p.y * 0.035 - cphase * 2.6) + 0.005 * sin(p.y * 0.09 - cphase * 4.3));
+    src.y -= cape * hem * H * wind * 0.005 * sin(p.x * 0.05 - cphase * 1.9);
     float4 c = float4(image.eval(src));
     float gl = float(rigmap.eval(src).g);
     float pulse = 0.55 + 0.45 * sin(time * 3.0);

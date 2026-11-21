@@ -48,7 +48,13 @@ import com.thriple.define.engine.Ranks
 import com.thriple.define.engine.Rewards
 import com.thriple.define.engine.Windows
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Animatable
 import java.time.LocalTime
+
+/** Whether this app launch has already played the full entrance. */
+object HomeIntro { var played = false }
 
 @Composable
 fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: () -> Unit) {
@@ -58,13 +64,31 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
     val done = state.doneOn(today)
     val planned = Logic.plannedType(state)
     val momentum = Rewards.momentum(state.streak)
+    // Entrance: the first open per app launch drops the hero in; the panels then fly in one by one.
+    val firstOpen = remember { !HomeIntro.played }
+    val appear = remember { List(3) { Animatable(0f) } }
+    LaunchedEffect(Unit) {
+        HomeIntro.played = true
+        val base = if (firstOpen) 950L else 0L
+        appear.forEachIndexed { i, a ->
+            launch { delay(base + i * (if (firstOpen) 160L else 70L)); a.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 260f)) }
+        }
+    }
+    fun Modifier.enter(i: Int, fromBelow: Boolean = false) = graphicsLayer {
+        val v = appear[i].value
+        alpha = v.coerceIn(0f, 1f)
+        translationY = (1f - v) * (if (fromBelow) 140f else -90f)
+        scaleX = 0.9f + 0.1f * v; scaleY = scaleX
+    }
+    val shownPower = if (appear[0].value > 0.3f) state.power else 0
+    val shownStreak = if (appear[1].value > 0.3f) state.streak else 0
 
     Column(
         Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal = 18.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Top HUD: rank + XP bar, power, settings
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().enter(0), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(Ranks.name(state.xp).uppercase(), style = Type.Sub.copy(fontSize = 15.sp, color = Palette.Gold))
                 Spacer(Modifier.height(5.dp))
@@ -72,7 +96,7 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
             }
             Spacer(Modifier.width(14.dp))
             Column(horizontalAlignment = Alignment.End) {
-                RollingNumber(state.power, Type.Title.copy(fontSize = 22.sp, color = Palette.Cyan), suffix = " ⚡")
+                RollingNumber(shownPower, Type.Title.copy(fontSize = 22.sp, color = Palette.Cyan), suffix = " ⚡")
                 Text("POWER", style = Type.Label.copy(fontSize = 10.sp))
             }
             Spacer(Modifier.width(12.dp))
@@ -83,7 +107,7 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
         }
 
         Spacer(Modifier.height(10.dp))
-        StreakRow(state.streak, momentum, state.shields)
+        Box(Modifier.enter(1)) { StreakRow(shownStreak, momentum, state.shields) }
 
         // The hero
         HeroView(
@@ -92,11 +116,14 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
             aura = if (done) Palette.Lime else Palette.Cyan,
             energy = ((momentum - 1.0) / 2.0).toFloat().coerceIn(0.15f, 1f),
             pump = if (done) 0.5f else 0f,   // post-workout pump for the rest of the day
+            lively = true,
+            constellation = state.streak,
+            dropIn = firstOpen,
         )
         Text("STAGE ${state.shownStage} / ${Logic.STAGES}", style = Type.Label.copy(color = Palette.Gold))
         Spacer(Modifier.height(10.dp))
 
-        MissionCard(state, done, planned, minute, onStart)
+        Box(Modifier.enter(2, fromBelow = true)) { MissionCard(state, done, planned, minute, onStart) }
     }
 }
 

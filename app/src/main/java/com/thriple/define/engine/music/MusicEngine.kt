@@ -258,6 +258,21 @@ class MusicEngine(val sampleRate: Int, seed: Long) {
         drumMuteUntil = beat + 4.0
     }
 
+    /** A landing or shockwave: sub drop, taiko, crash and a chord stab, scaled by [power] 0..1. */
+    fun hit(power: Float) = post {
+        impact.hit(0.4f + 0.5f * power)
+        taikoLo.hit(0.6f + 0.4f * power); taikoHi.hit(0.4f * power)
+        if (power > 0.4f) crash.hit(0.4f + 0.4f * power, 1.6f + power)
+        stabChord(chordTones(0, false), 12, 0.35f + 0.45f * power, 0.4f + 0.8f * power)
+        if (power > 0.7f) sparkle(10, 0.5f)
+    }
+
+    /** Poking the hero: a quick taiko tap and a short sparkle. */
+    fun tap() = post {
+        taikoHi.hit(0.55f)
+        sparkle(4, 0.4f)
+    }
+
     /** Build-up into whatever comes next, e.g. the end of a rest. */
     fun riser(seconds: Float) = post { startRiser(seconds) }
 
