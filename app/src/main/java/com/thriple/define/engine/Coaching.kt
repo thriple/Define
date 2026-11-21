@@ -87,6 +87,16 @@ object Coaching {
             pace = "Slow and controlled. A small lift is plenty.",
             avoid = "Don't arch your lower back or swing your arms.",
         ),
+        "tristretch" to Guide(
+            oneTime = "Hold the stretch until the timer ends, then the app switches you to the other side.",
+            steps = listOf(
+                "Raise one arm, bend the elbow and let your hand drop down your back.",
+                "With the other hand, hold that elbow and gently ease it back.",
+                "Breathe slowly and hold. You should feel it along the back of the upper arm.",
+            ),
+            pace = "Hold still for the timer.",
+            avoid = "Ease in. If the elbow itself hurts, back off.",
+        ),
         "pecstretch" to Guide(
             oneTime = "Hold the stretch until the timer ends, then the app switches you to the other side.",
             steps = listOf(

@@ -16,6 +16,8 @@ import androidx.core.content.ContextCompat
 import com.thriple.define.MainActivity
 import com.thriple.define.R
 import com.thriple.define.data.Store
+import com.thriple.define.engine.Body
+import com.thriple.define.engine.Muscle
 import com.thriple.define.engine.Windows
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,6 +33,7 @@ object Reminders {
     const val ACTION_SNOOZE = "com.thriple.define.SNOOZE"
     const val EXTRA_TITLE = "title"
     const val EXTRA_TEXT = "text"
+    const val EXTRA_OPEN_BODY = "open_body"
     private const val NOTIFICATION_ID = 7
     private const val REQ_NEXT = 1
     private const val REQ_SNOOZED = 2
@@ -59,34 +62,50 @@ object Reminders {
         am.cancel(cancelPi)
         if (!state.remindersOn) return
         val now = LocalDateTime.now()
-        val (day, nudge) = Windows.nextNudge(now.toLocalDate().toEpochDay(), now.hour * 60 + now.minute) { state.doneOn(it) }
+        val (day, nudge) = Windows.nextNudge(
+            now.toLocalDate().toEpochDay(), now.hour * 60 + now.minute,
+            doneOn = { state.doneOn(it) },
+            checkDue = { Body.checkInDue(state, it).isNotEmpty() },
+        )
         val at = LocalDate.ofEpochDay(day).atStartOfDay().plusMinutes(nudge.minute.toLong())
             .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         am.setWindow(AlarmManager.RTC_WAKEUP, at, 3 * 60_000L, nudgeIntent(context, REQ_NEXT, nudge.title, nudge.text))
     }
 
-    fun snooze(context: Context, title: String, text: String) {
+    fun snooze(context: Context, title: String, text: String, openBody: Boolean) {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
         val am = context.getSystemService(AlarmManager::class.java)
         am.setWindow(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 15 * 60_000L, 2 * 60_000L,
             nudgeIntent(context, REQ_SNOOZED, title, text))
     }
 
+    /**
+     * The evening check-in message, merged into the evening reminder: asks about the muscles from the last
+     * workout, and also mentions tonight's mission if it isn't done yet.
+     */
+    fun checkInMessage(muscles: List<Muscle>, missionDone: Boolean): Pair<String, String> {
+        val what = Body.list(muscles.take(2)).ifEmpty { "muscles" }
+        return if (missionDone) "Quick body check" to "How are your $what feeling? Ten seconds, and tomorrow's mission adapts."
+        else "Swim done? Body check first" to "How are your $what? Log it, then tonight's mission adapts to how you feel."
+    }
+
     fun canNotify(context: Context): Boolean =
         Build.VERSION.SDK_INT < 33 ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
-    fun show(context: Context, title: String, text: String) {
+    fun show(context: Context, title: String, text: String, openBody: Boolean = false) {
         if (!canNotify(context)) return
         ensureChannel(context)
         val open = PendingIntent.getActivity(
             context, REQ_OPEN,
-            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .putExtra(EXTRA_OPEN_BODY, openBody),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val snooze = PendingIntent.getBroadcast(
             context, REQ_SNOOZE_ACTION,
-            Intent(context, ReminderReceiver::class.java).setAction(ACTION_SNOOZE).putExtra(EXTRA_TITLE, title).putExtra(EXTRA_TEXT, text),
+            Intent(context, ReminderReceiver::class.java).setAction(ACTION_SNOOZE).putExtra(EXTRA_TITLE, title).putExtra(EXTRA_TEXT, text)
+                .putExtra(EXTRA_OPEN_BODY, openBody),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val n = NotificationCompat.Builder(context, CHANNEL)
@@ -99,7 +118,7 @@ object Reminders {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(open)
-            .addAction(0, "Start now", open)
+            .addAction(0, if (openBody) "Log it" else "Start now", open)
             .addAction(0, "Snooze 15 min", snooze)
             .build()
         try {
@@ -119,10 +138,21 @@ class ReminderReceiver : BroadcastReceiver() {
         when (intent.action) {
             Reminders.ACTION_NUDGE -> {
                 val state = Store.load(context)
-                if (state.remindersOn && !state.doneOn(Store.today())) Reminders.show(context, title, text)
+                val today = Store.today()
+                val now = LocalDateTime.now()
+                val minute = now.hour * 60 + now.minute
+                val due = if (minute in (Windows.CHECK_IN_MINUTE - 30)..(Windows.CHECK_IN_MINUTE + 40)) Body.checkInDue(state, today) else emptyList()
+                if (state.remindersOn) {
+                    if (due.isNotEmpty()) {
+                        val (t, x) = Reminders.checkInMessage(due, state.doneOn(today))
+                        Reminders.show(context, t, x, openBody = true)
+                    } else if (!state.doneOn(today)) {
+                        Reminders.show(context, title, text)
+                    }
+                }
                 Reminders.scheduleNext(context)
             }
-            Reminders.ACTION_SNOOZE -> Reminders.snooze(context, title, text)
+            Reminders.ACTION_SNOOZE -> Reminders.snooze(context, title, text, intent.getBooleanExtra(Reminders.EXTRA_OPEN_BODY, false))
         }
     }
 }

@@ -2,6 +2,7 @@ package com.thriple.define
 
 import android.Manifest
 import android.os.Build
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -32,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import com.thriple.define.data.Store
 import com.thriple.define.engine.AppState
-import com.thriple.define.engine.Area
+import com.thriple.define.engine.Body
 import com.thriple.define.engine.DayType
 import com.thriple.define.engine.Effort
 import com.thriple.define.engine.Logic
@@ -44,7 +45,10 @@ import com.thriple.define.engine.SurgeResult
 import com.thriple.define.engine.Windows
 import com.thriple.define.engine.music.Scene
 import com.thriple.define.reminders.Reminders
-import com.thriple.define.ui.CheckInScreen
+import com.thriple.define.ui.AdjustScreen
+import com.thriple.define.ui.BodyCheckScreen
+import com.thriple.define.ui.RecoveryScreen
+import com.thriple.define.ui.ReplyBanner
 import com.thriple.define.ui.EffortScreen
 import com.thriple.define.ui.FxLayer
 import com.thriple.define.ui.FxState
@@ -68,6 +72,9 @@ import kotlin.random.Random
 sealed interface Screen {
     data object Home : Screen
     data object CheckIn : Screen
+    data object Body : Screen
+    data class Adjust(val result: Logic.CheckInResult) : Screen
+    data object Recovery : Screen
     data class Workout(val plan: SessionPlan) : Screen
     data class Rate(val plan: SessionPlan, val completed: Map<String, Boolean>, val reps: Int) : Screen
     data class Pod(val pod: PodResult, val xp: Int, val rankUp: String?, val shield: Boolean) : Screen
@@ -91,8 +98,17 @@ class MainActivity : ComponentActivity() {
         canNotify = Reminders.canNotify(this)
         if (!canNotify && Build.VERSION.SDK_INT >= 33) askNotify.launch(Manifest.permission.POST_NOTIFICATIONS)
         Reminders.scheduleNext(this)
+        openBody = intent?.getBooleanExtra(Reminders.EXTRA_OPEN_BODY, false) == true
         setContent { DefineApp(this) }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(Reminders.EXTRA_OPEN_BODY, false)) openBody = true
+    }
+
+    /** Set when the evening check-in nudge was tapped. */
+    var openBody by mutableStateOf(false)
 
     override fun onStart() {
         super.onStart()
@@ -130,7 +146,8 @@ private fun DefineApp(activity: MainActivity) {
     LaunchedEffect(screen::class) {
         when (screen) {
             Screen.Home, Screen.Settings -> Music.scene(Scene.HOME, 100f, homeEnergy(state))
-            Screen.CheckIn -> Music.scene(Scene.HOME, 100f, (homeEnergy(state) + 0.2f).coerceAtMost(1f))
+            Screen.CheckIn, Screen.Body, Screen.Recovery -> Music.scene(Scene.HOME, 100f, (homeEnergy(state) + 0.1f).coerceAtMost(1f))
+            is Screen.Adjust -> Music.scene(Scene.CALM, 100f)
             is Screen.Rate -> Music.scene(Scene.CALM, 100f)
             is Screen.Pod -> Music.scene(Scene.POD, 100f)
             else -> Unit
@@ -146,6 +163,11 @@ private fun DefineApp(activity: MainActivity) {
             is Screen.Pod, is Screen.Transform, is Screen.Rate -> Unit // finish the reward flow
             else -> screen = Screen.Home
         }
+    }
+
+    var reply by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(activity.openBody) {
+        if (activity.openBody) { activity.openBody = false; if (screen !is Screen.Workout) screen = Screen.Body }
     }
 
     val time by rememberFrameTime()
@@ -170,12 +192,29 @@ private fun DefineApp(activity: MainActivity) {
                         state, Store.today(),
                         onStart = { screen = Screen.CheckIn },
                         onSettings = { screen = Screen.Settings },
+                        onBody = { screen = Screen.Body },
                     )
-                    Screen.CheckIn -> CheckInScreen { soreness: Map<Area, Int> ->
-                        val (ns, plan) = Logic.checkIn(state, Store.today(), soreness)
-                        save(ns)
-                        screen = Screen.Workout(plan)
+                    Screen.CheckIn -> BodyCheckScreen(state.body.lastOrNull(), preWorkout = true, onBack = { screen = Screen.Home }) { check ->
+                        val r = Logic.checkIn(state, Store.today(), check)
+                        save(r.state)
+                        screen = if (r.anyway != null) Screen.Adjust(r) else Screen.Workout(r.plan)
                     }
+                    Screen.Body -> BodyCheckScreen(state.body.lastOrNull(), preWorkout = false, onBack = { screen = Screen.Home }) { check ->
+                        val before = state
+                        save(Logic.logBody(state, check))
+                        reply = Body.reply(check, before, System.currentTimeMillis())
+                        Music.tap(); Haptics.click()
+                        fx.confetti(40)
+                        Reminders.scheduleNext(activity)
+                        screen = Screen.Home
+                    }
+                    is Screen.Adjust -> AdjustScreen(
+                        title = "Today: " + s.result.plan.type.title,
+                        notes = s.result.notes,
+                        onGo = { screen = Screen.Workout(s.result.plan) },
+                        onAnyway = { screen = Screen.Workout(s.result.anyway ?: s.result.plan) },
+                    )
+                    Screen.Recovery -> RecoveryScreen(state, Store.today()) { screen = Screen.Settings }
                     is Screen.Workout -> WorkoutScreen(
                         plan = s.plan,
                         primerSeen = state.seenPrimer,
@@ -216,11 +255,13 @@ private fun DefineApp(activity: MainActivity) {
                         onReminders = { save(state.copy(remindersOn = it)); Reminders.scheduleNext(activity) },
                         onAskNotify = { activity.requestNotifications() },
                         onTestReminder = { Reminders.show(activity, "Test: mission is live", "This is what your reminders look like.") },
+                        onRecovery = { screen = Screen.Recovery },
                         onBack = { screen = Screen.Home },
                     )
                 }
             }
             FxLayer(fx)
+            ReplyBanner(reply) { reply = null }
         }
         if (confirmQuit) {
             AlertDialog(
@@ -248,7 +289,7 @@ private fun finishSession(
 ): Screen {
     val inWindow = Windows.current(minute) != null
     val rankBefore = Ranks.index(state.xp)
-    val outcome = Logic.completeSession(state, Store.today(), plan, completed, effort, reps, inWindow)
+    val outcome = Logic.completeSession(state, Store.today(), plan, completed, effort, reps, inWindow, now = System.currentTimeMillis())
     val (afterPod, pod) = Rewards.openPod(outcome.state, rng, bonusXp = if (plan.welcomeBack) 100 else 0)
     val rankAfter = Ranks.index(afterPod.xp)
     Store.save(activity, afterPod)

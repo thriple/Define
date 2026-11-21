@@ -196,6 +196,10 @@ object Pictogram {
                 val u = cycle(t, 0.7f, 0.05f, 0.7f, 0.05f)
                 front(f, lerp(100f, -25f, u), lerp(100f, -25f, u))
             }
+            "tristretch" -> {
+                val u = cycle(t, 1.5f, 1.5f, 1.2f, 0.4f)
+                front(f, upper = lerp(172f, 180f, u), fore = lerp(-35f, -50f, u), work = true, upperR = 150f, foreR = lerp(238f, 246f, u))
+            }
             "pecstretch" -> {
                 val u = cycle(t, 1.5f, 1.5f, 1.2f, 0.4f)
                 f.line(P(0.30f, 0.05f), P(0.30f, FLOOR), Ink.SCENE, 0.03f)

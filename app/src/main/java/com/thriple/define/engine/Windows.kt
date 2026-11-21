@@ -29,17 +29,21 @@ object Windows {
      * Next nudge strictly after [minute] on [day], as (epochDay, nudge). Nudges for a day on which a mission
      * is done are skipped. Lunch only fires if the morning was missed, which is the same condition.
      */
-    fun nextNudge(day: Long, minute: Int, doneOn: (Long) -> Boolean): Pair<Long, Nudge> {
+    fun nextNudge(day: Long, minute: Int, doneOn: (Long) -> Boolean, checkDue: (Long) -> Boolean = { false }): Pair<Long, Nudge> {
         var d = day
         var after = minute
         repeat(3) {
-            if (!doneOn(d)) {
-                val n = nudges.firstOrNull { it.minute > after }
-                if (n != null) return d to n
-            }
+            val done = doneOn(d)
+            val due = checkDue(d)
+            // on a day that's already done, the evening nudge still fires if a recovery check-in is due
+            val n = nudges.firstOrNull { it.minute > after && (!done || (due && it.minute == CHECK_IN_MINUTE)) }
+            if (n != null) return d to n
             d += 1
             after = -1
         }
         return d to nudges.first()
     }
+
+    /** The evening nudge that doubles as the recovery check-in. */
+    const val CHECK_IN_MINUTE = 20 * 60 + 15
 }

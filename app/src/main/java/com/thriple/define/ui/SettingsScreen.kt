@@ -39,6 +39,7 @@ fun SettingsScreen(
     onReminders: (Boolean) -> Unit,
     onAskNotify: () -> Unit,
     onTestReminder: () -> Unit,
+    onRecovery: () -> Unit,
     onBack: () -> Unit,
 ) {
     Column(
@@ -86,6 +87,11 @@ fun SettingsScreen(
                 else "Music follows the workout. With music off you still get the countdown, the guide tone and the beeps. If you're already playing your own music, Define stays quiet.",
                 style = Type.Body,
             )
+        }
+        Section("RECOVERY") {
+            Text("How long each muscle takes to heal, from your body checks.", style = Type.Body)
+            Spacer(Modifier.height(10.dp))
+            Chip("RECOVERY CHARTS ›", true, Modifier.fillMaxWidth()) { onRecovery() }
         }
         Section("YOUR PLAN RIGHT NOW") {
             for (ex in Program.strength) {

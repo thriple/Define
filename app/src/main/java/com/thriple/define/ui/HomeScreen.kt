@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thriple.define.engine.AppState
+import com.thriple.define.engine.Body
 import com.thriple.define.engine.DayType
 import com.thriple.define.engine.Logic
 import com.thriple.define.engine.Program
@@ -57,7 +58,7 @@ import java.time.LocalTime
 object HomeIntro { var played = false }
 
 @Composable
-fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: () -> Unit) {
+fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: () -> Unit, onBody: () -> Unit) {
     var now by remember { mutableStateOf(LocalTime.now()) }
     LaunchedEffect(Unit) { while (true) { delay(15_000); now = LocalTime.now() } }
     val minute = now.hour * 60 + now.minute
@@ -99,7 +100,12 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
                 RollingNumber(shownPower, Type.Title.copy(fontSize = 22.sp, color = Palette.Cyan), suffix = " ⚡")
                 Text("POWER", style = Type.Label.copy(fontSize = 10.sp))
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
+            Box(
+                Modifier.size(42.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f)).bouncy { Sfx.play("tick"); onBody() },
+                contentAlignment = Alignment.Center,
+            ) { Text("✚", style = Type.Sub.copy(fontSize = 20.sp, color = Palette.Lime)) }
+            Spacer(Modifier.width(8.dp))
             Box(
                 Modifier.size(42.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f)).bouncy { Sfx.play("tick"); onSettings() },
                 contentAlignment = Alignment.Center,
@@ -108,6 +114,11 @@ fun HomeScreen(state: AppState, today: Long, onStart: () -> Unit, onSettings: ()
 
         Spacer(Modifier.height(10.dp))
         Box(Modifier.enter(1)) { StreakRow(shownStreak, momentum, state.shields) }
+        val recovering = remember(state.body, state.history, now) { Body.forecast(state, System.currentTimeMillis()) }
+        if (recovering.isNotEmpty()) {
+            Spacer(Modifier.height(6.dp))
+            RecoveryChip(recovering, Modifier.enter(1), onBody)
+        }
 
         // The hero
         HeroView(
@@ -196,4 +207,22 @@ fun clock(minuteOfDay: Int): String {
     val h = minuteOfDay / 60
     val h12 = if (h % 12 == 0) 12 else h % 12
     return "$h12:${"%02d".format(minuteOfDay % 60)} ${if (h < 12) "AM" else "PM"}"
+}
+
+/** "Triceps recovering · about a day" under the streak; tap to update how it feels. */
+@Composable
+private fun RecoveryChip(items: List<Body.Forecast>, modifier: Modifier, onTap: () -> Unit) {
+    val f = items.first()
+    val more = if (items.size > 1) " +${items.size - 1}" else ""
+    val text = if (f.hoursLeft <= 0f) "${f.muscle.label.uppercase()}$more SHOULD BE READY · CHECK IN"
+        else "${f.muscle.label.uppercase()}$more RECOVERING · ~${Body.days(f.hoursLeft).uppercase()}"
+    Row(
+        modifier.clip(RoundedCornerShape(16.dp)).background(levelColors[f.level].copy(alpha = 0.16f))
+            .border(1.dp, levelColors[f.level].copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+            .bouncy(onTap).padding(horizontal = 14.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("✚ ", style = Type.Label.copy(color = levelColors[f.level]))
+        Text(text, style = Type.Label.copy(fontSize = 11.sp, color = Palette.White))
+    }
 }

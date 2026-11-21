@@ -8,6 +8,7 @@ data class SessionRecord(
     val reps: Int,
     val effort: Effort?,
     val inWindow: Boolean,
+    val at: Long = 0,        // epoch millis when finished (0 for old records)
 )
 
 data class AppState(
@@ -33,6 +34,7 @@ data class AppState(
     val musicOn: Boolean = true,
     val remindersOn: Boolean = true,
     val seenPrimer: Boolean = false,
+    val body: List<BodyCheck> = emptyList(),        // recovery check-ins, oldest first
 ) {
     fun stepIndex(id: String): Int = steps[id] ?: 0
     fun doneOn(day: Long): Boolean = lastSessionDay == day

@@ -73,33 +73,130 @@ object Logic {
         }
     }
 
-    /**
-     * Applies the morning check-in (soreness 0..4 per area) and plans today's session.
-     * Pending step-ups go through only if their areas are fresh (<= 1); a 4 steps that exercise back.
-     * If the planned day's areas are still very sore (>= 3), today becomes RECHARGE and the plan waits.
-     */
+    /** Old-style check-in by area, kept for tests and callers that only know areas. */
     fun checkIn(state: AppState, today: Long, soreness: Map<Area, Int>): Pair<AppState, SessionPlan> {
+        val levels = Muscle.entries.map { m ->
+            val area = when (m) {
+                Muscle.BICEPS, Muscle.TRICEPS, Muscle.ELBOWS, Muscle.WRISTS -> Area.ARMS
+                Muscle.CHEST -> Area.CHEST
+                Muscle.SHOULDERS, Muscle.SHOULDER_JOINT -> Area.SHOULDERS
+                Muscle.UPPER_BACK -> Area.BACK
+            }
+            if (m.joint) 0 else soreness[area] ?: 0
+        }
+        val r = checkIn(state, today, BodyCheck(today * 24 * Body.HOUR + 8 * Body.HOUR, levels), record = false)
+        return r.state to r.plan
+    }
+
+    /** A body check on its own (from the home screen or the evening nudge). First check of a day earns 15 XP. */
+    fun logBody(state: AppState, check: BodyCheck): AppState {
+        val day = Body.dayOf(check.at)
+        val firstToday = state.body.none { Body.dayOf(it.at) == day }
+        return state.copy(body = (state.body + check).takeLast(300), xp = state.xp + if (firstToday) 15 else 0)
+    }
+
+    class CheckInResult(
+        val state: AppState,
+        val plan: SessionPlan,
+        /** The unadjusted plan for "train anyway", or null when nothing was changed. */
+        val anyway: SessionPlan?,
+        /** Plain-language reasons for each change. */
+        val notes: List<String>,
+    )
+
+    /**
+     * Applies a body check and plans today's session.
+     * - Pending step-ups go through only for exercises the body is fine with; one that would be dropped
+     *   steps back instead.
+     * - Each exercise is kept, kept without a step-up, made a round lighter, or dropped, depending on how
+     *   sore the muscles and joints it works are (see [Body.adjust]).
+     * - If that leaves a strength day with fewer than two exercises, the other strength day is used when the
+     *   body is ready for it, otherwise a Recharge day. The planned day then waits for next time.
+     * - Very sore muscles get their stretch added at the end.
+     */
+    fun checkIn(state: AppState, today: Long, check: BodyCheck, record: Boolean = true): CheckInResult {
         var s = refreshStreak(state, today)
         val welcomeBack = s.lastSessionDay >= 0 && today - s.lastSessionDay >= WELCOME_BACK_DAYS
         if (welcomeBack) s = shift(s, Program.strength.map { it.id }, -1)
 
-        fun sore(ex: Exercise) = ex.areas.maxOf { soreness[it] ?: 0 }
-        val up = s.pendingUp.filter { id -> Program.byId[id]?.let { sore(it) <= 1 } == true }
-        val back = s.pendingUp.filter { id -> Program.byId[id]?.let { sore(it) >= 4 } == true }
+        val up = s.pendingUp.filter { Body.adjust(it, check).first == Adjust.NORMAL }
+        val back = s.pendingUp.filter { Body.adjust(it, check).first == Adjust.DROP }
+        val held = s.pendingUp - up.toSet() - back.toSet()
         s = shift(s, up, +1)
         s = shift(s, back, -1)
         s = s.copy(pendingUp = emptySet())
+        if (record) {
+            val firstToday = s.body.none { Body.dayOf(it.at) == Body.dayOf(check.at) }
+            s = s.copy(body = (s.body + check).takeLast(300), xp = s.xp + if (firstToday) 15 else 0)
+        }
 
         val planned = plannedType(s)
-        val plannedSore = Program.forDay(planned).flatMap { it.areas }.toSet().maxOf { soreness[it] ?: 0 }
-        val type = if (planned != DayType.RECHARGE && plannedSore >= 3) DayType.RECHARGE else planned
-        val deload = type != DayType.RECHARGE && isDeloadWeek(s, today)
-        val items = Program.forDay(type).map { ex ->
-            val base = ex.ladder[clampIndex(s, ex, s.stepIndex(ex.id))]
-            val step = if (deload) base.copy(sets = maxOf(1, (base.sets * 0.6).toInt())) else base
-            PlannedExercise(ex, step)
+        val deloadWeek = isDeloadWeek(s, today)
+        fun build(type: DayType, adjusted: Boolean): Pair<SessionPlan, List<String>> {
+            val notes = ArrayList<String>()
+            val deload = type != DayType.RECHARGE && deloadWeek
+            val items = ArrayList<PlannedExercise>()
+            for (ex in Program.forDay(type)) {
+                val base = ex.ladder[clampIndex(s, ex, s.stepIndex(ex.id))]
+                var step = if (deload) base.copy(sets = maxOf(1, (base.sets * 0.6).toInt())) else base
+                if (adjusted && ex.isStrength) {
+                    val (a, m) = Body.adjust(ex.id, check)
+                    val why = m?.let { reason(it, check) } ?: ""
+                    when (a) {
+                        Adjust.DROP -> { notes += "${ex.name}: off today. $why"; continue }
+                        Adjust.LIGHTER -> if (step.sets > 1) { step = step.copy(sets = step.sets - 1); notes += "${ex.name}: one round fewer. $why" }
+                        Adjust.NO_STEP_UP -> if (ex.id in held) notes += "${ex.name}: staying at your current level for now. $why"
+                        Adjust.NORMAL -> Unit
+                    }
+                }
+                items += PlannedExercise(ex, step)
+            }
+            if (adjusted && type == DayType.RECHARGE) {
+                // stretches for whatever hurts go first
+                items.sortByDescending { pe -> Muscle.entries.count { check.strain(it) >= 2 && Body.eases(pe.exercise.id, it) } }
+            }
+            return SessionPlan(type, items, if (type != planned) planned else null, welcomeBack, deload) to notes
         }
-        return s to SessionPlan(type, items, if (type != planned) planned else null, welcomeBack, deload)
+
+        val original = build(planned, adjusted = false).first
+        var (plan, notes) = build(planned, adjusted = true)
+        if (planned != DayType.RECHARGE && plan.items.count { it.exercise.isStrength } < 2) {
+            val other = if (planned == DayType.PUSH) DayType.PULL else DayType.PUSH
+            val (alt, altNotes) = build(other, adjusted = true)
+            val trainedSore = Body.trained(planned).filter { check.strain(it) >= 3 }.ifEmpty { Body.trained(planned) }
+            if (alt.items.count { it.exercise.isStrength } >= 2) {
+                plan = alt
+                notes = listOf("Swapped to ${nice(other)} today: ${names(trainedSore)} need another day. ${nice(planned)} waits for next time.") + altNotes
+            } else {
+                plan = build(DayType.RECHARGE, adjusted = true).first
+                notes = listOf("Swapped to a Recharge day: ${names(trainedSore)} need another day, and so does the rest. Stretches for the sore spots come first. Recharge keeps your streak.")
+            }
+        }
+        // a finishing stretch for very sore muscles on a training day
+        if (plan.type != DayType.RECHARGE) {
+            val stretch = Program.forDay(DayType.RECHARGE).firstOrNull { ex ->
+                Muscle.entries.any { !it.joint && check.strain(it) >= 3 && Body.eases(ex.id, it) }
+            }
+            if (stretch != null) {
+                plan = plan.copy(items = plan.items + PlannedExercise(stretch, stretch.ladder[0]))
+                notes = notes + "Added ${stretch.name.lowercase()} at the end for the sore spot."
+            }
+        }
+        val changed = notes.isNotEmpty()
+        return CheckInResult(s, plan, if (changed) original else null, notes)
+    }
+
+    private fun reason(m: Muscle, check: BodyCheck): String = when {
+        m in check.sharp -> "${m.label} has sharp pain."
+        m.joint -> "${m.label}: joint ache, keeping the load off."
+        else -> "${m.label} ${if (check.level(m) >= 4) "are wrecked" else "are still recovering"}."
+    }.replace("Chest are", "Chest is").replace("Upper back are", "Upper back is")
+
+    private fun nice(t: DayType) = t.title.lowercase().replaceFirstChar { it.uppercase() }
+
+    private fun names(ms: List<Muscle>): String {
+        val l = ms.map { it.label.lowercase() }
+        return if (l.size <= 1) l.joinToString() else l.dropLast(1).joinToString(", ") + " and " + l.last()
     }
 
     /**
@@ -115,6 +212,7 @@ object Logic {
         effort: Effort?,
         reps: Int,
         inWindow: Boolean,
+        now: Long = (today * 24 + 8) * Body.HOUR,
     ): SessionOutcome {
         var s = refreshStreak(state, today)
         val streakBefore = s.streak
@@ -145,7 +243,7 @@ object Logic {
         s = s.copy(
             xp = s.xp + xp,
             lastSessionDay = today,
-            history = (s.history + SessionRecord(today, plan.type, sets, reps, effort, inWindow)).takeLast(400),
+            history = (s.history + SessionRecord(today, plan.type, sets, reps, effort, inWindow, at = now)).takeLast(400),
         )
         return SessionOutcome(s, xp, up, back, streakBefore, shieldEarned)
     }

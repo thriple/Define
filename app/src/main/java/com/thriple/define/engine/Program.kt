@@ -75,6 +75,11 @@ object Program {
         ),
         // RECHARGE
         Exercise(
+            "tristretch", "Overhead triceps stretch", DayType.RECHARGE, setOf(Area.ARMS),
+            "Hand down your back between the shoulder blades, other hand gently pulls the elbow.",
+            listOf(Step(1, 30, 0)), perSide = true, measure = Measure.SECONDS,
+        ),
+        Exercise(
             "pecstretch", "Doorway chest stretch", DayType.RECHARGE, setOf(Area.CHEST),
             "Forearm on the door frame, step through gently.",
             listOf(Step(1, 30, 0)), perSide = true, measure = Measure.SECONDS,

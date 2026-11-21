@@ -2,6 +2,9 @@ package com.thriple.define.data
 
 import android.content.Context
 import com.thriple.define.engine.AppState
+import com.thriple.define.engine.Body
+import com.thriple.define.engine.BodyCheck
+import com.thriple.define.engine.Muscle
 import com.thriple.define.engine.DayType
 import com.thriple.define.engine.Effort
 import com.thriple.define.engine.SessionRecord
@@ -17,6 +20,7 @@ object Store {
     fun today(): Long = LocalDate.now().toEpochDay()
 
     fun load(context: Context): AppState {
+        Body.zoneOffsetMillis = java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis()).toLong()
         val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null)
             ?: return AppState(startDay = today())
         return try { fromJson(JSONObject(raw)) } catch (e: Exception) { AppState(startDay = today()) }
@@ -59,11 +63,18 @@ object Store {
         put("musicOn", s.musicOn)
         put("remindersOn", s.remindersOn)
         put("seenPrimer", s.seenPrimer)
+        put("body", JSONArray().apply {
+            s.body.forEach { c ->
+                put(JSONObject().apply {
+                    put("at", c.at); put("l", JSONArray(c.levels)); put("s", JSONArray(c.sharp.map { it.name }))
+                })
+            }
+        })
         put("history", JSONArray().apply {
             s.history.forEach { r ->
                 put(JSONObject().apply {
                     put("day", r.day); put("type", r.type.name); put("sets", r.sets); put("reps", r.reps)
-                    put("effort", r.effort?.name ?: ""); put("inWindow", r.inWindow)
+                    put("effort", r.effort?.name ?: ""); put("inWindow", r.inWindow); put("at", r.at)
                 })
             }
         })
@@ -80,7 +91,19 @@ object Store {
                 reps = r.optInt("reps"),
                 effort = r.optString("effort").takeIf { it.isNotEmpty() }?.let { Effort.valueOf(it) },
                 inWindow = r.optBoolean("inWindow"),
+                at = r.optLong("at", 0),
             )
+        }
+        val bodyArr = o.optJSONArray("body")
+        val body = if (bodyArr == null) emptyList() else (0 until bodyArr.length()).mapNotNull { i ->
+            try {
+                val c = bodyArr.getJSONObject(i)
+                BodyCheck(
+                    at = c.getLong("at"),
+                    levels = ints(c.optJSONArray("l")),
+                    sharp = strings(c.optJSONArray("s")).mapNotNull { n -> Muscle.entries.firstOrNull { it.name == n } }.toSet(),
+                )
+            } catch (e: Exception) { null }
         }
         return AppState(
             startDay = o.getLong("startDay"),
@@ -105,6 +128,7 @@ object Store {
             musicOn = o.optBoolean("musicOn", true),
             remindersOn = o.optBoolean("remindersOn", true),
             seenPrimer = o.optBoolean("seenPrimer", false),
+            body = body,
         )
     }
 }
