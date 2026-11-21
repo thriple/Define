@@ -310,3 +310,14 @@ Quality was poor at batch 5 / 3B Q8; added input noise, tile size and preview mo
   hear. No audio focus requests; stays quiet if other music is already playing.
 - Settings: separate SOUND and MUSIC toggles. With music off, cues (count-in, movement arps, metronome) remain.
 - Demos are rendered on the JVM by `MusicDemo.kt` in the scratch enginetest project.
+
+### Recovery pass (2026-11-21)
+- `engine/Body.kt`: Muscle (5 muscles + 3 joints), BodyCheck (0–4 levels plus sharp flags), per-exercise
+  muscle loads, `adjust()` (NORMAL / NO_STEP_UP / LIGHTER / DROP), recovery episodes, typical healing
+  hours, forecast, curves, calendar, and the hero-voiced reply.
+- `Logic.checkIn(state, today, BodyCheck)` returns the plan, the "train anyway" plan and notes. It swaps
+  to the other strength day or to Recharge when fewer than 2 exercises remain. The old area-based
+  overload is kept for tests.
+- The evening reminder (20:15) becomes the check-in on the 1st and 2nd evening after a strength workout,
+  and opens the app on the body check. The user chose open-the-app over notification buttons.
+- Settings > Recovery charts use chart colours validated with the dataviz script on the Ink surface.
