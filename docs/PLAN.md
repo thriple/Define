@@ -295,3 +295,18 @@ intensity setting; widget.
 `S:\pinokio\api\comfy.git\app\custom_nodes\seedvr2_videoupscaler\inference_cli.py` with ComfyUI's
 `app\env\Scripts\python.exe`, models in `app\models\SEEDVR2`, ffmpeg from `S:\pinokio\bin\ffmpeg-env`.
 Quality was poor at batch 5 / 3B Q8; added input noise, tile size and preview mode for A/B tests.
+
+### Music pass (2026-11-21)
+- `engine/music/`: real-time synth engine in pure Kotlin. Instruments: 909-style kick, snare, clap, hats/crash,
+  synth taiko pair, pumping bass, acid line, supersaw pads/stabs, pulse plucks, risers, impacts. Electronic
+  writing only; the user asked for no synth imitations of real-instrument music.
+- Scenes: HOME (energy grows with progress and streak), CALM, WORK, REST, POD, VICTORY, TRANSFORM. The key
+  changes each day.
+- `engine/Pace.kt`: every exercise's rhythm is in beats at 128–140 BPM, so one rep = 2 bars. The figure,
+  cue words, haptics and music all read from it. PACE ME counts in to a bar line.
+- PACE ME movement cue: a fast arpeggio up the chord while lifting and a slower one down while lowering.
+  A continuous gliding guide tone was tried and rejected because it sounded like a siren.
+- `ui/Music.kt`: AudioTrack thread. The beat clock comes from the playback head, so visuals match what you
+  hear. No audio focus requests; stays quiet if other music is already playing.
+- Settings: separate SOUND and MUSIC toggles. With music off, cues (count-in, movement arps, metronome) remain.
+- Demos are rendered on the JVM by `MusicDemo.kt` in the scratch enginetest project.

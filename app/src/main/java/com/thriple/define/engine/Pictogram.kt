@@ -117,45 +117,36 @@ object Pictogram {
     private fun rad(d: Float) = d * PI.toFloat() / 180f
     private fun bell(f: Frame, at: P) { f.dot(at, 0.032f, Ink.WEIGHT) }
 
-    /**
-     * The rhythm of one repetition: (cue word, seconds). Same timing as the diagram's loop, so the figure,
-     * the beat and the on-screen cue stay in sync. Empty word = a quiet pause.
-     */
-    fun phases(id: String): List<Pair<String, Float>> = when (id) {
-        "curls" -> listOf("UP" to 1.0f, "HOLD" to 0.25f, "DOWN" to 2.0f, "" to 0.35f)
-        "press" -> listOf("PRESS" to 1.0f, "HOLD" to 0.25f, "LOWER" to 1.8f, "" to 0.35f)
-        "triceps" -> listOf("LOWER" to 1.8f, "" to 0.2f, "UP" to 1.0f, "" to 0.4f)
-        "pushups" -> listOf("DOWN" to 1.6f, "" to 0.2f, "UP" to 1.0f, "" to 0.4f)
-        "row" -> listOf("PULL" to 1.0f, "SQUEEZE" to 0.3f, "LOWER" to 1.6f, "" to 0.4f)
-        "ytw" -> listOf("Y" to 0.9f, "" to 0.5f, "T" to 0.9f, "" to 0.5f, "W" to 0.9f, "" to 0.5f)
-        "wallslides" -> listOf("UP" to 1.6f, "" to 0.2f, "DOWN" to 1.6f, "" to 0.2f)
-        else -> listOf("GO" to 1.5f, "" to 1.5f)
-    }
+    /** The rhythm of one repetition: (cue word, seconds). Derived from [Paces], so it matches the music. */
+    fun phases(id: String): List<Pair<String, Float>> = Paces.of(id).let { pc -> pc.phases.map { it.word to it.beats * pc.secondsPerBeat } }
 
     /** Seconds per repetition at the demonstrated pace. */
-    fun period(id: String): Float = phases(id).sumOf { it.second.toDouble() }.toFloat()
+    fun period(id: String): Float = Paces.of(id).seconds
+
+    /** Position 0..1 away from the start for a paced exercise, [t] seconds into the loop. */
+    private fun paced(id: String, t: Float): Float = Paces.of(id).let { it.out(t / it.secondsPerBeat) }
 
     fun frame(id: String, t: Float): Frame {
         val f = Frame()
         floor(f)
         when (id) {
             "curls" -> {
-                val u = cycle(t, 1.0f, 0.25f, 2.0f, 0.35f)
+                val u = paced(id, t)
                 val (h, fh) = standingSide(f, 0.45f, lerp(0f, 8f, u), lerp(2f, 155f, u), work = setOf("upper"))
                 bell(f, fh); bell(f, h)
             }
             "press" -> {
-                val u = cycle(t, 1.0f, 0.25f, 1.8f, 0.35f)
+                val u = paced(id, t)
                 val (h, fh) = standingSide(f, 0.45f, lerp(25f, 176f, u), lerp(172f, 180f, u), work = setOf("upper", "fore"))
                 bell(f, fh); bell(f, h)
             }
             "triceps" -> {
-                val u = cycle(t, 1.8f, 0.2f, 1.0f, 0.4f)
+                val u = paced(id, t)
                 val (h, _) = standingSide(f, 0.45f, lerp(172f, 162f, u), lerp(180f, 215f, u), farUpper = lerp(172f, 162f, u), farFore = lerp(180f, 215f, u), work = setOf("upper"))
                 bell(f, h)
             }
             "pushups" -> {
-                val u = cycle(t, 1.6f, 0.2f, 1.0f, 0.4f)
+                val u = paced(id, t)
                 val toes = P(0.16f, FLOOR)
                 fun body(alpha: Float): Triple<P, P, P> {
                     val d = P(cos(rad(alpha)), -sin(rad(alpha)))
@@ -170,7 +161,7 @@ object Pictogram {
                 f.line(sh, elbow, Ink.WORK); f.line(elbow, hand, Ink.BODY); f.line(hand, hand + P(0.04f, 0f), Ink.BODY, 0.025f)
             }
             "row" -> {
-                val u = cycle(t, 1.0f, 0.3f, 1.6f, 0.4f)
+                val u = paced(id, t)
                 f.line(P(0.04f, 0.63f), P(0.62f, 0.63f), Ink.SCENE, 0.04f)
                 f.line(P(0.08f, 0.63f), P(0.08f, FLOOR), Ink.SCENE, 0.02f); f.line(P(0.58f, 0.63f), P(0.58f, FLOOR), Ink.SCENE, 0.02f)
                 val hip = P(0.26f, 0.50f); val sh = P(0.52f, 0.51f); val head = sh + P(NECK + HEAD, 0.01f)
@@ -186,14 +177,14 @@ object Pictogram {
                 f.line(sh, elbow, Ink.WORK); f.line(elbow, hand, Ink.BODY); bell(f, hand)
             }
             "ytw" -> {
-                val seg = 1.4f
-                val k = ((t % (seg * 3)) / seg).toInt()
-                val u = cycle(t % seg, 0.5f, 0.4f, 0.4f, 0.1f)
+                val pc = Paces.of(id)
+                val k = pc.liftIndex(t / pc.secondsPerBeat)
+                val u = paced(id, t)
                 val (up, fo) = when (k) { 0 -> 150f to 150f; 1 -> 90f to 90f; else -> 55f to 145f }
                 front(f, lerp(15f, up, u), lerp(15f, fo, u))
             }
             "wallslides" -> {
-                val u = cycle(t, 1.6f, 0.2f, 1.6f, 0.2f)
+                val u = paced(id, t)
                 f.lines += Line(0.2f, 0.06f, 0.8f, 0.06f, 0.01f, Ink.SCENE)
                 front(f, lerp(80f, 155f, u), lerp(172f, 168f, u))
             }

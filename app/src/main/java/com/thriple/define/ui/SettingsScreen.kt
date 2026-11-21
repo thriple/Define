@@ -35,6 +35,7 @@ fun SettingsScreen(
     canNotify: Boolean,
     onWeights: (Set<Int>) -> Unit,
     onSound: (Boolean) -> Unit,
+    onMusic: (Boolean) -> Unit,
     onReminders: (Boolean) -> Unit,
     onAskNotify: () -> Unit,
     onTestReminder: () -> Unit,
@@ -75,7 +76,16 @@ fun SettingsScreen(
             }
         }
         Section("SOUND") {
-            Chip(if (state.soundOn) "ON" else "MUTED", state.soundOn, Modifier.fillMaxWidth()) { onSound(!state.soundOn) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip(if (state.soundOn) "SOUND ON" else "ALL MUTED", state.soundOn, Modifier.weight(1f)) { onSound(!state.soundOn) }
+                Chip(if (state.musicOn && state.soundOn) "MUSIC ON" else "MUSIC OFF", state.musicOn && state.soundOn, Modifier.weight(1f)) { onMusic(!state.musicOn) }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (Music.otherAudio && state.musicOn) "Something else was already playing, so the music is staying quiet. Cues still play."
+                else "Music follows the workout. With music off you still get the countdown, the guide tone and the beeps. If you're already playing your own music, Define stays quiet.",
+                style = Type.Body,
+            )
         }
         Section("YOUR PLAN RIGHT NOW") {
             for (ex in Program.strength) {

@@ -34,8 +34,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -44,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,12 +66,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thriple.define.engine.Coaching
 import com.thriple.define.engine.Measure
+import com.thriple.define.engine.Motion
+import com.thriple.define.engine.Paces
 import com.thriple.define.engine.PlannedExercise
 import com.thriple.define.engine.Rarity
 import com.thriple.define.engine.SessionPlan
 import com.thriple.define.engine.SurgeResult
+import com.thriple.define.engine.music.Scene
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
+import kotlin.math.floor
 
 private const val REST_SECONDS = 60
 
@@ -106,6 +114,14 @@ fun WorkoutScreen(
         phase == Phase.REST -> View.REST
         slot.item.exercise.id !in introduced -> View.INTRO
         else -> View.WORK
+    }
+
+    LaunchedEffect(view, index) {
+        when (view) {
+            View.PRIMER -> Music.scene(Scene.CALM, 100f)
+            View.INTRO, View.WORK -> Music.scene(Scene.WORK, Paces.of(slot.item.exercise.id).bpm)
+            View.REST -> Music.scene(Scene.REST)
+        }
     }
 
     fun advance() {
@@ -153,7 +169,8 @@ fun WorkoutScreen(
                     onHowTo = { introduced.remove(s.item.exercise.id) },
                     onGiveUp = {
                         completed[s.item.exercise.id] = false
-                        Sfx.play("fail"); Haptics.thud()
+                        if (!Music.fail()) Sfx.play("fail")
+                        Haptics.thud()
                         advance()
                     },
                 )
@@ -164,13 +181,14 @@ fun WorkoutScreen(
 
 private fun celebrateSet(fx: FxState, at: Offset, surge: SurgeResult) {
     val c = Palette.rarity(surge.rarity)
-    Sfx.play("set")
+    val scored = Music.roundDone(surge.rarity.ordinal)
+    if (!scored) Sfx.play("set")
     Haptics.click()
     fx.ring(at, c, 700f, 26f)
     fx.burst(at, listOf(c, Palette.Magenta, Palette.Cyan, Palette.Lime), count = 34, speed = 1100f)
     fx.text("+${surge.power} POWER", Offset(at.x, at.y - 40f), c, 34f)
     if (surge.rarity >= Rarity.ENHANCED) {
-        Sfx.play("surge")
+        if (!scored) Sfx.play("surge")
         fx.text("${surge.rarity.label.uppercase()} SURGE!", Offset(at.x, at.y + 120f), c, 30f)
     }
     if (surge.rarity >= Rarity.ELITE) {
@@ -242,30 +260,28 @@ private fun WorkPanel(slot: Slot, onRep: () -> Unit, onSetDone: (Offset) -> Unit
 }
 
 /**
- * One tap when the round is done (hands are busy holding weights). Or PACE ME: a 3-2-1 countdown, then a
- * rhythm at the exercise's tempo: cue word + tone for each part of the movement (high = lift, low = lower),
- * the stick figure moving in sync inside the ring, and a countdown of how many are left. Completes by itself.
+ * One tap when the round is done (hands are busy holding weights). Or PACE ME: a count-in, then the round
+ * locked to the music's beat: cue words, the stick figure, a guide tone that follows the weight up and down,
+ * and a countdown of how many are left. Completes by itself.
  */
 @Composable
 private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone: (Offset) -> Unit) {
     val fx = LocalFx.current
     val scope = rememberCoroutineScope()
+    val pace = remember(exerciseId) { Paces.of(exerciseId) }
     var reps by remember { mutableIntStateOf(0) }
     var pacing by remember { mutableStateOf(false) }
-    var countdown by remember { mutableIntStateOf(0) }
-    var cue by remember { mutableStateOf("") }
     var finished by remember { mutableStateOf(false) }
     var center by remember { mutableStateOf(Offset.Zero) }
+    var rel by remember { mutableFloatStateOf(-99f) } // beats since the first repetition began; negative = count-in
     val punch = remember { Animatable(1f) }
     val fill by animateFloatAsState(reps.toFloat() / target, spring(dampingRatio = 0.55f, stiffness = 260f), label = "fill")
     val time by rememberFrameTime()
     val repCallback by rememberUpdatedState(onRep)
     val doneCallback by rememberUpdatedState(onDone)
-    val lifts = setOf("UP", "PRESS", "PULL", "Y", "T", "W", "GO")
-    val lowers = setOf("DOWN", "LOWER")
 
     fun pop(i: Int) {
-        Sfx.play("pop", 0.9f + 0.06f * i)
+        if (!Music.isRunning) Sfx.play("pop", 0.9f + 0.06f * i)
         Haptics.click()
         fx.burst(center, listOf(Palette.Cyan, Palette.Magenta, Palette.Lime), count = 16, speed = 700f)
         fx.ring(center, Palette.Cyan.copy(alpha = 0.7f), 420f, 10f)
@@ -280,33 +296,41 @@ private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone
         scope.launch { delay(200); doneCallback(center) }
     }
 
+    DisposableEffect(Unit) { onDispose { if (!finished) Music.stopPace() } }
+
     LaunchedEffect(pacing) {
         if (!pacing) return@LaunchedEffect
-        for (n in 3 downTo 1) {
-            countdown = n
-            Sfx.play("tick", 1.0f); Haptics.tick()
-            delay(800)
-        }
-        countdown = 0
-        val phases = com.thriple.define.engine.Pictogram.phases(exerciseId)
-        while (pacing && reps < target && !finished) {
-            for ((word, secs) in phases) {
-                cue = word
-                when (word) {
-                    in lifts -> { Sfx.play("tick", 1.6f); Haptics.tick() }
-                    in lowers -> { Sfx.play("tick", 0.8f); Haptics.tick() }
-                    "" -> Unit
-                    else -> Sfx.play("tick", 1.25f, 0.45f)
-                }
-                delay((secs * 1000).toLong())
-                if (!pacing || finished) break
+        val t0 = System.nanoTime()
+        fun fallback(): Double = (System.nanoTime() - t0) / 1e9 * pace.bpm / 60.0
+        val useMusic = Music.beatNow() != null
+        fun clock(): Double? = if (useMusic) Music.beatNow() else fallback()
+        val start = ceil(((clock() ?: 0.0) + 8.0) / 4.0) * 4.0
+        if (useMusic) Music.pace(pace, start, target)
+        var lastCount = -1
+        var lastPhase = -1
+        while (!finished) {
+            withFrameNanos { }
+            val b = clock() ?: continue          // audio paused (app in background): hold still
+            val r = (b - start).toFloat()
+            rel = r
+            if (r < 0f) {
+                val n = countdownNumber(-r)
+                if (n != lastCount) { lastCount = n; if (n > 0) Haptics.tick() }
+                continue
             }
-            if (!pacing || finished) break
-            reps += 1
-            repCallback()
-            pop(reps)
+            val k = floor(r / pace.beats).toInt()
+            if (k > reps) {
+                while (reps < minOf(k, target)) { reps += 1; repCallback() }
+                pop(reps)
+            }
+            if (k >= target) { finish(); break }
+            val (pi, _) = pace.phaseAt(r)
+            if (pi != lastPhase) {
+                lastPhase = pi
+                val m = pace.phases[pi].motion
+                if (m == Motion.LIFT || m == Motion.LOWER) Haptics.tick()
+            }
         }
-        if (reps >= target) finish()
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -322,7 +346,9 @@ private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone
                 val stroke = 22.dp.toPx()
                 val inset = stroke / 2 + 6.dp.toPx()
                 val arcSize = Size(size.width - inset * 2, size.height - inset * 2)
-                drawCircle(Brush.radialGradient(listOf(Palette.Magenta.copy(alpha = 0.35f), Color.Transparent)), radius = size.minDimension / 2)
+                // on the beat: the glow pulses with every quarter note while pacing
+                val beatPulse = if (pacing) { val f = rel - floor(rel); (1f - f).let { it * it } } else 0f
+                drawCircle(Brush.radialGradient(listOf(Palette.Magenta.copy(alpha = 0.35f + 0.3f * beatPulse), Color.Transparent)), radius = size.minDimension / 2)
                 drawArc(Color.White.copy(alpha = 0.12f), 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke))
                 rotate(-90f) {
                     drawArc(
@@ -338,16 +364,26 @@ private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone
                     }
                 }
             }
+            val count = if (rel < 0f) countdownNumber(-rel) else -1
             when {
-                pacing && countdown > 0 -> AnimatedContent(
-                    targetState = countdown,
+                pacing && count == 0 -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("GET READY", style = Type.Title.copy(color = Palette.Gold))
+                    Text("PICK UP THE WEIGHTS", style = Type.Label)
+                }
+                pacing && count > 0 -> AnimatedContent(
+                    targetState = count,
                     transitionSpec = { (scaleIn(spring(dampingRatio = 0.4f), initialScale = 2f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.5f) + fadeOut()) },
                     label = "countdown",
                 ) { n -> Text("$n", style = Type.Huge.copy(fontSize = 110.sp, color = Palette.Gold)) }
-                pacing -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    PictogramView(exerciseId, Modifier.size(120.dp))
-                    Text(cue.ifEmpty { " " }, style = Type.Title.copy(color = if (cue in lowers) Palette.Violet else Palette.Lime))
-                    Text("${target - reps} LEFT", style = Type.Label)
+                pacing -> {
+                    val (pi, _) = pace.phaseAt(rel.coerceAtLeast(0f))
+                    val phase = pace.phases[pi]
+                    val inRep = rel.coerceAtLeast(0f) % pace.beats
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        PictogramView(exerciseId, Modifier.size(120.dp), at = inRep * pace.secondsPerBeat)
+                        Text(phase.word.ifEmpty { " " }, style = Type.Title.copy(color = if (phase.motion == Motion.LOWER) Palette.Violet else Palette.Lime))
+                        Text("${target - reps} LEFT", style = Type.Label)
+                    }
                 }
                 else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("$target", style = Type.Huge.copy(fontSize = 96.sp))
@@ -364,6 +400,14 @@ private fun RepTarget(exerciseId: String, target: Int, onRep: () -> Unit, onDone
             )
         }
     }
+}
+
+/** Beats left in the count-in -> what to show: 0 = "get ready", then 3, 2, 1 every two beats. */
+private fun countdownNumber(left: Float): Int = when {
+    left > 6f -> 0
+    left > 4f -> 3
+    left > 2f -> 2
+    else -> 1
 }
 
 /** Timed holds: press start, the ring drains, done. */
@@ -411,7 +455,8 @@ private fun RestPanel(next: Slot, onDone: () -> Unit) {
         while (left > 0) {
             delay(1000)
             left -= 1
-            if (left in 1..3) { Sfx.play("tick", 1.2f); Haptics.tick() }
+            if (left == 4) Music.riser(4f)
+            if (left in 1..3) { if (!Music.isRunning) Sfx.play("tick", 1.2f); Haptics.tick() }
         }
         onDone()
     }

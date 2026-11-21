@@ -56,6 +56,7 @@ object Store {
         put("shownStage", s.shownStage)
         put("weights", JSONArray(s.weights.toList()))
         put("soundOn", s.soundOn)
+        put("musicOn", s.musicOn)
         put("remindersOn", s.remindersOn)
         put("seenPrimer", s.seenPrimer)
         put("history", JSONArray().apply {
@@ -101,6 +102,7 @@ object Store {
             history = history,
             weights = ints(o.optJSONArray("weights")).toSet().ifEmpty { setOf(30) },
             soundOn = o.optBoolean("soundOn", true),
+            musicOn = o.optBoolean("musicOn", true),
             remindersOn = o.optBoolean("remindersOn", true),
             seenPrimer = o.optBoolean("seenPrimer", false),
         )

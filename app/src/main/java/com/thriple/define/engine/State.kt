@@ -30,6 +30,7 @@ data class AppState(
     val history: List<SessionRecord> = emptyList(),
     val weights: Set<Int> = setOf(30),
     val soundOn: Boolean = true,
+    val musicOn: Boolean = true,
     val remindersOn: Boolean = true,
     val seenPrimer: Boolean = false,
 ) {

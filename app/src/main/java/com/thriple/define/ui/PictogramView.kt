@@ -12,12 +12,15 @@ import com.thriple.define.engine.Ink
 import com.thriple.define.engine.Pictogram
 import kotlin.math.min
 
-/** Looping neon stick-figure demo of an exercise, at the pace it should be done. */
+/**
+ * Looping neon stick-figure demo of an exercise, at the pace it should be done. Pass [at] (seconds into the
+ * repetition) to drive it from the music's beat clock instead of its own.
+ */
 @Composable
-fun PictogramView(exerciseId: String, modifier: Modifier = Modifier) {
+fun PictogramView(exerciseId: String, modifier: Modifier = Modifier, at: Float? = null) {
     val time by rememberFrameTime()
     Canvas(modifier) {
-        val f = Pictogram.frame(exerciseId, time)
+        val f = Pictogram.frame(exerciseId, at ?: time)
         val s = min(size.width, size.height)
         val ox = (size.width - s) / 2f
         val oy = (size.height - s) / 2f

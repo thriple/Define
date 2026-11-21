@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import com.thriple.define.engine.Rewards
 import com.thriple.define.engine.SessionPlan
 import com.thriple.define.engine.SurgeResult
 import com.thriple.define.engine.Windows
+import com.thriple.define.engine.music.Scene
 import com.thriple.define.reminders.Reminders
 import com.thriple.define.ui.CheckInScreen
 import com.thriple.define.ui.EffortScreen
@@ -50,6 +52,7 @@ import com.thriple.define.ui.Haptics
 import com.thriple.define.ui.HomeScreen
 import com.thriple.define.ui.LivingBackground
 import com.thriple.define.ui.LocalFx
+import com.thriple.define.ui.Music
 import com.thriple.define.ui.Palette
 import com.thriple.define.ui.PodScreen
 import com.thriple.define.ui.SettingsScreen
@@ -89,6 +92,16 @@ class MainActivity : ComponentActivity() {
         setContent { DefineApp(this) }
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (Store.load(this).soundOn) Music.start(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Music.stop()
+    }
+
     override fun onResume() {
         super.onResume()
         canNotify = Reminders.canNotify(this)
@@ -109,6 +122,18 @@ private fun DefineApp(activity: MainActivity) {
     var confirmQuit by remember { mutableStateOf(false) }
     val rng = remember { Random(System.nanoTime()) }
     Sfx.enabled = state.soundOn
+    Music.musicWanted = state.musicOn
+
+    // Music for every screen outside the workout (the workout screen drives its own).
+    LaunchedEffect(screen::class) {
+        when (screen) {
+            Screen.Home, Screen.Settings -> Music.scene(Scene.HOME, 100f, homeEnergy(state))
+            Screen.CheckIn -> Music.scene(Scene.HOME, 100f, (homeEnergy(state) + 0.2f).coerceAtMost(1f))
+            is Screen.Rate -> Music.scene(Scene.CALM, 100f)
+            is Screen.Pod -> Music.scene(Scene.POD, 100f)
+            else -> Unit
+        }
+    }
 
     fun save(s: AppState) { state = s; Store.save(activity, s) }
     fun minuteNow(): Int = LocalTime.now().let { it.hour * 60 + it.minute }
@@ -180,7 +205,11 @@ private fun DefineApp(activity: MainActivity) {
                         state = state,
                         canNotify = activity.notificationsAllowed,
                         onWeights = { save(state.copy(weights = it)) },
-                        onSound = { save(state.copy(soundOn = it)); Sfx.enabled = it },
+                        onSound = {
+                            save(state.copy(soundOn = it)); Sfx.enabled = it
+                            if (it) Music.start(activity) else Music.stop()
+                        },
+                        onMusic = { save(state.copy(musicOn = it)); Music.musicWanted = it },
                         onReminders = { save(state.copy(remindersOn = it)); Reminders.scheduleNext(activity) },
                         onAskNotify = { activity.requestNotifications() },
                         onTestReminder = { Reminders.show(activity, "Test: mission is live", "This is what your reminders look like.") },
@@ -225,3 +254,7 @@ private fun finishSession(
     val rankUp = if (rankAfter > rankBefore) Ranks.names[rankAfter] else null
     return commit(afterPod, Screen.Pod(pod, outcome.xpGained, rankUp, outcome.shieldEarned))
 }
+
+/** How lively the home-screen music is: grows with overall progress and the current streak. */
+private fun homeEnergy(s: AppState): Float =
+    (0.2f + 0.55f * Logic.progress(s).toFloat() + 0.25f * (s.streak / 21f).coerceAtMost(1f)).coerceIn(0f, 1f)

@@ -126,6 +126,7 @@ fun PodScreen(
         if (opened) return
         taps += 1
         Sfx.play("crack", 0.8f + taps * 0.15f)
+        if (taps < 3) Music.crack(taps - 1)
         Haptics.click()
         fx.burst(center, listOf(Palette.White, glowColor), count = 10 + taps * 6, speed = 700f)
         scope.launch {
@@ -136,13 +137,14 @@ fun PodScreen(
             opened = true
             scope.launch {
                 podScale.animateTo(1.25f, tween(160))
-                Sfx.play("boom"); Sfx.play("reveal"); Haptics.rumble()
+                if (!Music.reveal(pod.rarity.ordinal)) { Sfx.play("boom"); Sfx.play("reveal") }
+                Haptics.rumble()
                 fx.flash(if (pod.rarity >= Rarity.ELITE) glowColor else Color.White, 0.7f, 0.9f)
                 fx.ring(center, glowColor, 1400f, 40f)
                 fx.burst(center, listOf(glowColor, Palette.Magenta, Palette.Cyan, Palette.Lime, Palette.Gold), count = 70, speed = 1600f)
                 fx.shake(30f)
                 fx.confetti(if (pod.rarity >= Rarity.LEGENDARY) 220 else 120)
-                if (rankUp != null) { delay(900); Sfx.play("levelup"); fx.flash(Palette.Gold, 0.6f, 0.5f) }
+                if (rankUp != null) { delay(900); if (!Music.rankUp()) Sfx.play("levelup"); fx.flash(Palette.Gold, 0.6f, 0.5f) }
             }
         }
     }
@@ -274,12 +276,14 @@ fun TransformScreen(from: Int, to: Int, onDone: () -> Unit) {
     var center by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(Unit) {
-        for (i in 0 until 5) { Sfx.play("surge", 0.6f + i * 0.25f, 0.7f); Haptics.tick(); delay(420) }
+        val scored = Music.charge(2.4f)
+        for (i in 0 until 5) { if (!scored) Sfx.play("surge", 0.6f + i * 0.25f, 0.7f); Haptics.tick(); delay(420) }
     }
     LaunchedEffect(Unit) {
         charge.animateTo(1f, tween(2300, easing = LinearEasing))
         fx.flash(Color.White, 1.1f, 1f)
-        Sfx.play("boom"); Sfx.play("levelup"); Haptics.rumble()
+        if (!Music.boom()) { Sfx.play("boom"); Sfx.play("levelup") }
+        Haptics.rumble()
         delay(180)
         revealed = true
         fx.ring(center, Palette.Cyan, 1500f, 50f)
