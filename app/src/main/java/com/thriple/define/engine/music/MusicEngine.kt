@@ -515,11 +515,19 @@ class MusicEngine(val sampleRate: Int, seed: Long) {
         if (rel < 0) {
             val left = (-rel).toInt()
             if (!paceRiser && left <= 32) { paceRiser = true; startRiser(left * 60f / bpm.toFloat() / 4f) }
+            // 3, 2, 1 land on heavy hits (kick + taiko + clap), with the kick pounding every beat between
             if (left == 24 || left == 16 || left == 8) {
+                val push = (24 - left) / 16f
                 blip((root + transpose + 24).toFloat(), 1f)
-                if (musicOn) { taikoLo.hit(0.7f + 0.15f * (24 - left) / 8f); taikoHi.hit(0.4f) }
+                if (musicOn) { taikoLo.hit(0.85f + 0.15f * push); taikoHi.hit(0.5f + 0.2f * push); clap.hit(0.7f + 0.2f * push) }
+            } else if (!musicOn && left % 4 == 0) {
+                blip((root + transpose + 36).toFloat(), 0.4f, 0.05f)
             }
-            if (left <= 16 && (left > 8 && left % 2 == 0 || left <= 8)) snare.hit(((17 - left) / 16f) * 0.75f)
+            if (left < 8 && musicOn) {
+                // after "1": kick doubles to eighths and a snare roll climbs into the first rep
+                if (left % 2 == 0 && left % 4 != 0) { kick.hit(0.8f); sc = 1f }
+                snare.hit(0.2f + 0.45f * (8 - left) / 8f)
+            }
             return
         }
         val k = (rel / repSteps).toInt()
@@ -537,6 +545,11 @@ class MusicEngine(val sampleRate: Int, seed: Long) {
         for (ph in p.phases) {
             val len = (ph.beats * 4).roundToInt()
             val moving = ph.motion == Motion.LIFT || ph.motion == Motion.LOWER
+            if (moving && within == acc && musicOn) {
+                // the beat follows the movement: a heavy hit to drive each lift, a lighter one to start lowering
+                if (ph.motion == Motion.LIFT) { taikoLo.hit(1f); clap.hit(0.65f); kick.hit(1f); sc = 1f }
+                else taikoHi.hit(0.6f)
+            }
             if (moving && within >= acc && within < acc + len) {
                 val j = within - acc
                 val rate = if (len <= 8) 1 else 2
@@ -593,7 +606,8 @@ class MusicEngine(val sampleRate: Int, seed: Long) {
         if (rel < 0) {
             val left = (-rel).toInt()
             lCountIn = left
-            if (left <= 16) { lKick = 0; lHats = 0; lArp = 0 }
+            lKick = 2                                   // a steady beat to count along to
+            if (left <= 24) { lHats = 0; lArp = 0; lSnare = 0 }
             if (left <= 8) lBass = 0
             return
         }
