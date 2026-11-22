@@ -141,7 +141,7 @@ object Logic {
                 var step = if (deload) base.copy(sets = maxOf(1, (base.sets * 0.6).toInt())) else base
                 if (adjusted && ex.isStrength) {
                     val (a, m) = Body.adjust(ex.id, check)
-                    val why = m?.let { reason(it, check) } ?: ""
+                    val why = m?.let { reason(it, check, Body.load(ex.id, it) < 0.6f) } ?: ""
                     when (a) {
                         Adjust.DROP -> { notes += "${ex.name}: off today. $why"; continue }
                         Adjust.LIGHTER -> if (step.sets > 1) { step = step.copy(sets = step.sets - 1); notes += "${ex.name}: one round fewer. $why" }
@@ -163,13 +163,18 @@ object Logic {
         if (planned != DayType.RECHARGE && plan.items.count { it.exercise.isStrength } < 2) {
             val other = if (planned == DayType.PUSH) DayType.PULL else DayType.PUSH
             val (alt, altNotes) = build(other, adjusted = true)
-            val trainedSore = Body.trained(planned).filter { check.strain(it) >= 3 }.ifEmpty { Body.trained(planned) }
             if (alt.items.count { it.exercise.isStrength } >= 2) {
+                val why = blockers(planned, check)
                 plan = alt
-                notes = listOf("Swapped to ${nice(other)} today: ${names(trainedSore)} need another day. ${nice(planned)} waits for next time.") + altNotes
+                notes = listOf("Swapped to ${nice(other)} today: ${names(why)} ${need(why)} another day. ${nice(planned)} waits for next time.") + altNotes
             } else {
+                val why = (blockers(planned, check) + blockers(other, check)).distinct().sortedByDescending { check.strain(it) }
                 plan = build(DayType.RECHARGE, adjusted = true).first
-                notes = listOf("Swapped to a Recharge day: ${names(trainedSore)} need another day, and so does the rest. Stretches for the sore spots come first. Recharge keeps your streak.")
+                notes = listOf(
+                    "Swapped to a Recharge day: ${names(why)} ${need(why)} another day, and both push and pull lean on " +
+                        "${if (why.size == 1 && why[0] in singular) "it" else "them"}. " +
+                        "Stretches for the sore spots come first. Recharge keeps your streak.",
+                )
             }
         }
         // a finishing stretch for very sore muscles on a training day
@@ -186,11 +191,25 @@ object Logic {
         return CheckInResult(s, plan, if (changed) original else null, notes)
     }
 
-    private fun reason(m: Muscle, check: BodyCheck): String = when {
-        m in check.sharp -> "${m.label} has sharp pain."
-        m.joint -> "${m.label}: joint ache, keeping the load off."
-        else -> "${m.label} ${if (check.level(m) >= 4) "are wrecked" else "are still recovering"}."
-    }.replace("Chest are", "Chest is").replace("Upper back are", "Upper back is")
+    private val singular = setOf(Muscle.CHEST, Muscle.UPPER_BACK, Muscle.SHOULDER_JOINT)
+
+    private fun need(ms: List<Muscle>) = if (ms.size == 1 && ms[0] in singular) "needs" else "need"
+
+    /** The muscles and joints that knocked exercises off a day, worst first. */
+    private fun blockers(type: DayType, check: BodyCheck): List<Muscle> =
+        Program.forDay(type).filter { it.isStrength }
+            .mapNotNull { ex -> Body.adjust(ex.id, check).let { (a, m) -> if (a == Adjust.DROP) m else null } }
+            .distinct().sortedByDescending { check.strain(it) }
+
+    private fun reason(m: Muscle, check: BodyCheck, helper: Boolean = false): String {
+        val be = if (m in singular) "is" else "are"
+        val base = when {
+            m in check.sharp -> "${m.label} has sharp pain."
+            m.joint -> "${m.label}: joint ache, keeping the load off."
+            else -> "${m.label} $be ${if (check.level(m) >= 4) "wrecked" else "still recovering"}."
+        }
+        return if (helper && !m.joint && m !in check.sharp) base.dropLast(1) + ", and this move leans on ${if (m in singular) "it" else "them"} too." else base
+    }
 
     private fun nice(t: DayType) = t.title.lowercase().replaceFirstChar { it.uppercase() }
 

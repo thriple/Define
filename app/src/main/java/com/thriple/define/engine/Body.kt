@@ -65,8 +65,9 @@ object Body {
         "pushups" to mapOf(Muscle.CHEST to 1f, Muscle.TRICEPS to 0.6f, Muscle.SHOULDERS to 0.5f, Muscle.WRISTS to 0.4f, Muscle.ELBOWS to 0.3f),
         "press" to mapOf(Muscle.SHOULDERS to 1f, Muscle.TRICEPS to 0.6f, Muscle.SHOULDER_JOINT to 0.6f, Muscle.ELBOWS to 0.3f, Muscle.WRISTS to 0.2f, Muscle.UPPER_BACK to 0.2f),
         "triceps" to mapOf(Muscle.TRICEPS to 1f, Muscle.ELBOWS to 0.7f, Muscle.SHOULDER_JOINT to 0.3f),
-        "curls" to mapOf(Muscle.BICEPS to 1f, Muscle.ELBOWS to 0.5f, Muscle.WRISTS to 0.4f),
-        "row" to mapOf(Muscle.UPPER_BACK to 1f, Muscle.BICEPS to 0.6f, Muscle.SHOULDERS to 0.3f, Muscle.ELBOWS to 0.2f, Muscle.WRISTS to 0.2f),
+        // the triceps steadies the elbow through every curl, and its long head helps pull the arm back in a row
+        "curls" to mapOf(Muscle.BICEPS to 1f, Muscle.ELBOWS to 0.5f, Muscle.WRISTS to 0.4f, Muscle.TRICEPS to 0.3f),
+        "row" to mapOf(Muscle.UPPER_BACK to 1f, Muscle.BICEPS to 0.6f, Muscle.TRICEPS to 0.35f, Muscle.SHOULDERS to 0.3f, Muscle.ELBOWS to 0.2f, Muscle.WRISTS to 0.2f),
         "ytw" to mapOf(Muscle.UPPER_BACK to 0.7f, Muscle.SHOULDERS to 0.5f, Muscle.SHOULDER_JOINT to 0.3f),
     )
 
@@ -90,20 +91,26 @@ object Body {
     fun trained(type: DayType): List<Muscle> =
         Muscle.entries.filter { !it.joint && dayLoad(type, it) >= 0.6f }.sortedByDescending { dayLoad(type, it) }
 
-    /** What to do with one exercise given how the body feels, and the muscle responsible. */
+    /**
+     * What to do with one exercise given how the body feels, and the muscle responsible.
+     * - Wrecked muscles, sharp pain and badly aching joints can't help at all: any move that uses them
+     *   noticeably, even as a helper, is off.
+     * - Very sore: the main mover is off, a big helper means a round lighter.
+     * - Otherwise soreness times how hard the move works it decides.
+     */
     fun adjust(id: String, check: BodyCheck): Pair<Adjust, Muscle?> {
+        val blocked = Muscle.entries.filter { load(id, it) >= 0.3f && check.strain(it) >= 4 }.maxByOrNull { load(id, it) }
+        if (blocked != null) return Adjust.DROP to blocked
         var worst: Muscle? = null
         var score = 0f
         for (m in Muscle.entries) {
             val s = load(id, m) * check.strain(m)
             if (s > score) { score = s; worst = m }
         }
-        // sharp pain anywhere the move loads noticeably: off the list
-        val sharpHit = Muscle.entries.firstOrNull { it in check.sharp && check.level(it) > 0 && load(id, it) >= 0.3f }
-        if (sharpHit != null) return Adjust.DROP to sharpHit
+        val bigHelperSore = Muscle.entries.firstOrNull { load(id, it) >= 0.5f && check.strain(it) >= 3 }
         val a = when {
-            score >= 3.5f -> Adjust.DROP
-            score >= 2.2f -> Adjust.LIGHTER
+            score >= 3f -> Adjust.DROP
+            score >= 2.2f || bigHelperSore != null -> Adjust.LIGHTER
             score >= 1.5f -> Adjust.NO_STEP_UP
             else -> Adjust.NORMAL
         }
